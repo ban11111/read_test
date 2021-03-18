@@ -1,70 +1,57 @@
-# Getting Started with Create React App
+### react pc 端项目
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+react + typescript + mobx
 
-## Available Scripts
+1. husky + prettier : 控制代码风格统一
 
-In the project directory, you can run:
+2. 比较简单的模块可以尝试用函数组件 react-hooks
 
-### `npm start`
+   - 尝试 comonents 下 组件部分迁移 hooks
+   - page 下的组件 也可以进行尝试
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+3. mobx 管理数据流
+    - redux 迁移 mobx 
+    - mobx 添加逻辑代码
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+4. 合理分配 package.json 模块,开发环境和生产环境隔离开
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### roadmap
+ps. 你觉的哪些可以添加的在下列中添加你的想法
 
-### `npm run build`
+1. 代码规范 
+    - 代码提交检测
+    - 代码扫描检测
+    - 代码提交会跑单元测试(push) 如果跑不过就不让提交
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. 提升代码质量 
+    - 代码走读
+    - 圈复杂度检测代码
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. 测试覆盖
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   - 代码的可测性, 你的代码一定是可以测试的，如果测试很难写 需要你去优化代码
+   - 测试代码的可读性
+   - 单元测试覆盖率 50% 以上(分支/函数覆盖率),
 
-### `npm run eject`
+4. 性能优化
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+    - lazy load (使用 Suspense + lazy 实现)
+    - 首屏优化
+    - webpack 打包优化
+    - express 代理层优化 
+    ...
+```
+web端性能添加工具google: Page Speed Score  可以检测你的页面优化的指标
+1. express 添加gzip 压缩 
+  const compression = require('compression')
+  app.use(compression())
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. http response Connection: keep-alive  
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+5. web 端监控
+    - 监控报错
+    - 性能监控
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+6. scss module
