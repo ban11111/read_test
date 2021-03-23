@@ -3,12 +3,12 @@ import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TextField from '@material-ui/core/TextField'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import Checkbox from '@material-ui/core/Checkbox'
+// import FormControlLabel from '@material-ui/core/FormControlLabel'
+// import Checkbox from '@material-ui/core/Checkbox'
 import Link from '@material-ui/core/Link'
 import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
+import HeadsetMicOutlinedIcon from '@material-ui/icons/HeadsetMicOutlined'
 import Typography from '@material-ui/core/Typography'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     avatar: {
       margin: theme.spacing(1),
-      backgroundColor: theme.palette.secondary.main
+      backgroundColor: theme.palette.primary.light
     },
     form: {
       width: '100%', // Fix IE 11 issue.
@@ -56,34 +56,26 @@ export default function InfoPage(p: any) {
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
+          <HeadsetMicOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign up
+          Chinese Character Reading Test
+        </Typography>
+        <Typography component="h3" variant="subtitle1" style={{ color: 'grey' }}>
+          Instructions: xxxx
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
-                autoComplete="fname"
-                name="firstName"
+                name="name"
                 variant="outlined"
                 required
                 fullWidth
-                id="firstName"
-                label="First Name"
+                id="name"
+                label="Name"
+                autoComplete="name"
                 autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
               />
             </Grid>
             <Grid item xs={12}>
@@ -91,10 +83,22 @@ export default function InfoPage(p: any) {
                 variant="outlined"
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+                id="chineseClass"
+                label="Chinese Class"
+                name="chineseClass"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField variant="outlined" required fullWidth id="hksLevel" label="HKS Level" name="hksLevel" />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="ethnicBackground"
+                label="Ethnic Background"
+                name="ethnicBackground"
               />
             </Grid>
             <Grid item xs={12}>
@@ -110,11 +114,22 @@ export default function InfoPage(p: any) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
               />
             </Grid>
+            {/*<Grid item xs={12}>*/}
+            {/*  <FormControlLabel*/}
+            {/*    control={<Checkbox value="allowExtraEmails" color="primary" />}*/}
+            {/*    label="I want to receive inspiration, marketing promotions and updates via email."*/}
+            {/*  />*/}
+            {/*</Grid>*/}
           </Grid>
           <Button
             type="submit"
@@ -127,7 +142,7 @@ export default function InfoPage(p: any) {
               p.props.history.push('/demo')
             }}
           >
-            Sign Up
+            Sign Up / Start ?
           </Button>
           <Grid container justify="flex-end">
             <Grid item>

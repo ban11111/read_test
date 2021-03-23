@@ -8,15 +8,15 @@ import 'recorder-core/src/engine/mp3-engine'
 import 'recorder-core/src/extensions/waveview'
 
 import { makeStyles, styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
-import { green } from '@material-ui/core/colors'
+import { blue, green, red } from '@material-ui/core/colors'
 // import CircularProgress from '@material-ui/core/CircularProgress'
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import {
   Fab,
   Button,
   Container,
   Grid,
   Paper,
-  Input,
   MobileStepper,
   TextField,
   InputLabel,
@@ -110,8 +110,10 @@ export default class Index extends Component {
       src: '',
       audioConf: defaultAudioConf,
       wordIndex: 0,
-      words: ['要读的字', '字2', '字3', '后面会在', '管理页面开放配置']
+      words: ['要读的字', '字2', '字3', '后面会在', '管理页面开放配置'],
+      reRenderTimer: false
     }
+    this.translationRef = React.createRef()
   }
 
   wave
@@ -132,6 +134,10 @@ export default class Index extends Component {
   timeoutFn = setTimeout(() => {
     console.log('无法录音：权限请求被忽略（超时假装手动点击了确认对话框）', 1)
   }, 10000)
+
+  // shouldComponentUpdate(nextProps, nextState, nextContext) {
+  //   return nextState.wordIndex !== this.state.wordIndex
+  // }
 
   componentDidMount() {
     console.log('正在打开录音，请求麦克风权限...')
@@ -196,6 +202,8 @@ export default class Index extends Component {
       document.onmouseup = null
     })
     this.recStop()
+    // console.log('????????????????', this.translationRef)
+    this.translationRef.current.lastChild.firstChild.focus()
   }
 
   touchDown = () => {
@@ -226,26 +234,65 @@ export default class Index extends Component {
   }
 
   onClickNext = () => {
-    this.setState({ wordIndex: this.state.wordIndex + 1 })
+    if (this.state.wordIndex >= this.state.words.length - 1) {
+      return
+    }
+    this.setState({ wordIndex: this.state.wordIndex + 1, reRenderTimer: true }, () => {
+      this.setState({ reRenderTimer: false })
+    })
   }
   onClickBack = () => {
-    this.setState({ wordIndex: this.state.wordIndex - 1 })
+    if (this.state.wordIndex <= 0) {
+      return
+    }
+    this.setState({ wordIndex: this.state.wordIndex - 1, reRenderTimer: true }, () => {
+      this.setState({ reRenderTimer: false })
+    })
   }
 
   updateAudioConf = (sampleRate, bitRate) => {
     this.setState({ audioConf: { sampleRate: sampleRate, bitRate: bitRate } })
   }
 
+  renderCountDown = wordIndex => {
+    return (
+      <CountdownCircleTimer
+        isPlaying={false}
+        duration={10}
+        size={60}
+        strokeWidth={8}
+        colors={[
+          [green.A200, 0.33],
+          [blue['300'], 0.33],
+          [red['500'], 0.34]
+        ]}
+        onComplete={totalElapsedTime => {
+          console.log(totalElapsedTime, wordIndex, 'on complete')
+          this.onClickNext()
+        }}
+      >
+        {({ remainingTime }) => {
+          return <div style={{ fontSize: 'xx-large' }}>{remainingTime}</div>
+        }}
+      </CountdownCircleTimer>
+    )
+  }
+
   render() {
-    const { status, src, words, wordIndex, audioConf } = this.state
+    const { status, src, words, wordIndex, audioConf, reRenderTimer } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
     return (
       <Container maxWidth="sm">
-        <div>
-          <Word>{currentWord}</Word>
-        </div>
         <Grid container spacing={2} className={useStyles.wrapper} alignItems={'center'}>
+          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+            {!reRenderTimer && this.renderCountDown(wordIndex)}
+          </Grid>
+          <Grid item xs={12}>
+            <div>
+              <Word>{currentWord}</Word>
+            </div>
+          </Grid>
           <Grid item xs={2}>
             <Fab
               className="nocopy"
@@ -253,7 +300,7 @@ export default class Index extends Component {
               onMouseDown={this.mouseDown}
               onTouchStart={this.touchDown}
               onTouchEnd={this.touchUp}
-              onContextMenu={function(e) {
+              onContextMenu={e => {
                 e.preventDefault()
               }}
               size="medium"
@@ -263,20 +310,21 @@ export default class Index extends Component {
             </Fab>
             {/*{recording && <CircularProgress size={24} className={useStyles.buttonProgress}/>}*/}
           </Grid>
-          <Grid item xs={7}>
+          <Grid item xs={8}>
             {this.renderVisualization()}
           </Grid>
-          <Grid item xs={3}>
-            <Button color="secondary" variant="contained" onClick={this.playAndStop}>
+          <Grid item xs={2}>
+            <Button color="secondary" variant="contained" onClick={this.playAndStop} style={{ float: 'right' }}>
               Play
             </Button>
           </Grid>
           <Grid item xs={12}>
-            <audio controls ref={'audio'} src={src} />
+            <audio controls ref="audio" src={src} />
           </Grid>
 
           <Grid item xs={12}>
             <ValidationTextField
+              ref={this.translationRef}
               label="Input translation here"
               required
               fullWidth
