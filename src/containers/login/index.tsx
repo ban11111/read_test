@@ -10,6 +10,7 @@ const Login: React.FC<any> = (props: any) => {
     props.form.validateFields((err: any, values: any) => {
       if (!err) {
         console.log('Received values of form: ', values)
+        props.history.push('/admin/dashboard')
       }
     })
   }

@@ -257,7 +257,7 @@ export default class Index extends Component {
   renderCountDown = wordIndex => {
     return (
       <CountdownCircleTimer
-        isPlaying={false}
+        isPlaying={true}
         duration={10}
         size={60}
         strokeWidth={8}
