@@ -43,7 +43,7 @@ const DashboardLayout = props => {
       <div className={classes.wrapper}>
         <div className={classes.contentContainer}>
           <div className={classes.content}>
-            <props.components />
+            <props.components {...props} />
           </div>
         </div>
       </div>

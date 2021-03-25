@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import {
-  Avatar,
   Box,
   Card,
   Checkbox,
@@ -14,12 +13,11 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
   makeStyles,
   ButtonGroup,
   Button
 } from '@material-ui/core'
-import getInitials from 'utils/getInitials'
+import Editor from './editor/editor'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -28,17 +26,18 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Results = ({ className, users, history, ...rest }) => {
+const Results = ({ className, datas, ...rest }) => {
   const classes = useStyles()
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([])
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(0)
+  const [editProps, setEditProps] = useState({ open: false })
 
   const handleSelectAll = event => {
     let newSelectedCustomerIds
 
     if (event.target.checked) {
-      newSelectedCustomerIds = users.map(customer => customer.id)
+      newSelectedCustomerIds = datas.map(customer => customer.id)
     } else {
       newSelectedCustomerIds = []
     }
@@ -74,12 +73,18 @@ const Results = ({ className, users, history, ...rest }) => {
     setPage(newPage)
   }
 
-  const handleReview = e => {
-    history.push('/admin/users/' + e.currentTarget.value)
+  const onClickEditExit = () => {
+    setEditProps({ open: false })
+  }
+
+  const handleEditClicked = e => {
+    const dataIndex = e.currentTarget.value
+    setEditProps({ open: true, onClickExit: onClickEditExit, data: datas[dataIndex] })
   }
 
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
+      <Editor {...editProps} />
       <PerfectScrollbar>
         <Box minWidth={1050}>
           <Table>
@@ -87,51 +92,47 @@ const Results = ({ className, users, history, ...rest }) => {
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={selectedCustomerIds.length === users.length}
+                    checked={selectedCustomerIds.length === datas.length}
                     color="primary"
-                    indeterminate={selectedCustomerIds.length > 0 && selectedCustomerIds.length < users.length}
+                    indeterminate={selectedCustomerIds.length > 0 && selectedCustomerIds.length < datas.length}
                     onChange={handleSelectAll}
                   />
                 </TableCell>
+                <TableCell>Id</TableCell>
+                <TableCell>CreatedAt</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Chinese Class</TableCell>
-                <TableCell>HKS Level</TableCell>
-                <TableCell>Ethnic Background</TableCell>
-                <TableCell>Exam Result</TableCell>
-                <TableCell>RegisteredAt</TableCell>
+                <TableCell>Words</TableCell>
                 <TableCell align="center">Operation</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.slice(0, limit).map(user => (
-                <TableRow hover key={user.id} selected={selectedCustomerIds.indexOf(user.id) !== -1}>
+              {datas.slice(0, limit).map((data, index) => (
+                <TableRow hover key={data.id} selected={selectedCustomerIds.indexOf(data.id) !== -1}>
                   <TableCell padding="checkbox">
                     <Checkbox
-                      checked={selectedCustomerIds.indexOf(user.id) !== -1}
-                      onChange={event => handleSelectOne(event, user.id)}
+                      checked={selectedCustomerIds.indexOf(data.id) !== -1}
+                      onChange={event => handleSelectOne(event, data.id)}
                       value="true"
                     />
                   </TableCell>
+                  <TableCell>{data.id}</TableCell>
+                  <TableCell>{moment(data.createdAt).format('DD/MM/YYYY')}</TableCell>
+                  <TableCell>{data.name}</TableCell>
                   <TableCell>
-                    <Box alignItems="center" display="flex">
-                      <Avatar className={classes.avatar}>{getInitials(user.name)}</Avatar>
-                      <Typography color="textPrimary" variant="body1">
-                        {user.name}
-                      </Typography>
-                    </Box>
+                    {data.words.map((word, i) => {
+                      return (
+                        <span style={{ margin: 1 }} key={i}>
+                          {word}
+                        </span>
+                      )
+                    })}
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.chineseClass}</TableCell>
-                  <TableCell>{user.hksLevel}</TableCell>
-                  <TableCell>{user.ethnic}</TableCell>
-                  <TableCell>{'todo'}</TableCell>
-                  <TableCell>{moment(user.createdAt).format('DD/MM/YYYY')}</TableCell>
                   <TableCell align="center">
                     <ButtonGroup size="small">
-                      <Button color="primary" onClick={handleReview} value={user.id}>
-                        review
+                      <Button color="primary" onClick={handleEditClicked} value={index}>
+                        edit
                       </Button>
+                      <Button color="primary">publish</Button>
                       <Button color="secondary">delete</Button>
                     </ButtonGroup>
                   </TableCell>
@@ -143,7 +144,7 @@ const Results = ({ className, users, history, ...rest }) => {
       </PerfectScrollbar>
       <TablePagination
         component="div"
-        count={users.length}
+        count={datas.length}
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleLimitChange}
         page={page}
@@ -156,8 +157,7 @@ const Results = ({ className, users, history, ...rest }) => {
 
 Results.propTypes = {
   className: PropTypes.string,
-  users: PropTypes.array.isRequired,
-  history: PropTypes.any
+  datas: PropTypes.array.isRequired
 }
 
 export default Results

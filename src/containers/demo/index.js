@@ -108,9 +108,11 @@ export default class Index extends Component {
       rec: null,
       status: 'init',
       src: '',
+      input: '',
       audioConf: defaultAudioConf,
       wordIndex: 0,
       words: ['要读的字', '字2', '字3', '后面会在', '管理页面开放配置'],
+      answers: [], // {upload_url:"s3上传路径", translation:"翻译"}
       reRenderTimer: false
     }
     this.translationRef = React.createRef()
@@ -235,11 +237,19 @@ export default class Index extends Component {
 
   onClickNext = () => {
     if (this.state.wordIndex >= this.state.words.length - 1) {
+      this.props.history.push('/finish')
       return
     }
-    this.setState({ wordIndex: this.state.wordIndex + 1, reRenderTimer: true }, () => {
-      this.setState({ reRenderTimer: false })
-    })
+    this.setState(
+      {
+        wordIndex: this.state.wordIndex + 1,
+        reRenderTimer: true,
+        answers: this.state.answers.concat({ upload_url: 'todo', translation: this.state.input })
+      },
+      () => {
+        this.setState({ reRenderTimer: false, src: '', input: '' })
+      }
+    )
   }
   onClickBack = () => {
     if (this.state.wordIndex <= 0) {
@@ -283,7 +293,7 @@ export default class Index extends Component {
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
     return (
-      <Container maxWidth="sm">
+      <Container maxWidth="sm" className="demo-page">
         <Grid container spacing={2} className={useStyles.wrapper} alignItems={'center'}>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             {!reRenderTimer && this.renderCountDown(wordIndex)}
@@ -308,7 +318,6 @@ export default class Index extends Component {
             >
               {recording ? '松开\n结束' : '按住\n录音'}
             </Fab>
-            {/*{recording && <CircularProgress size={24} className={useStyles.buttonProgress}/>}*/}
           </Grid>
           <Grid item xs={8}>
             {this.renderVisualization()}
@@ -330,6 +339,10 @@ export default class Index extends Component {
               fullWidth
               variant="outlined"
               id="validation-outlined-input"
+              value={this.state.input}
+              onChange={e => {
+                this.setState({ input: e.currentTarget.value })
+              }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -339,8 +352,8 @@ export default class Index extends Component {
               position="static"
               activeStep={wordIndex}
               nextButton={
-                <Button size="small" onClick={this.onClickNext} disabled={wordIndex + 1 >= words.length}>
-                  Next
+                <Button size="small" onClick={this.onClickNext}>
+                  {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
                   {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                 </Button>
               }

@@ -1,144 +1,92 @@
-import { v4 as uuid } from 'uuid'
-
 export default [
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'West Virginia',
-      city: 'Parkersburg',
-      street: '2849 Fulton Street'
-    },
-    avatarUrl: '/static/images/avatars/avatar_3.png',
+    id: 1,
     createdAt: 1555016400000,
-    email: 'ekaterina.tankova@devias.io',
+    email: 'ekaterina.tankova@qq.com',
     name: 'Ekaterina Tankova',
-    phone: '304-428-3097'
+    chineseClass: 'Class A',
+    hksLevel: 'Level A',
+    ethnic: '汉族'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Bristow',
-      city: 'Iowa',
-      street: '1865  Pleasant Hill Road'
-    },
-    avatarUrl: '/static/images/avatars/avatar_4.png',
+    id: 2,
     createdAt: 1555016400000,
-    email: 'cao.yu@devias.io',
-    name: 'Cao Yu',
-    phone: '712-351-5711'
+    email: 'ha.ha@qq.com',
+    name: 'Ha Ha',
+    chineseClass: 'Class B',
+    hksLevel: 'Level B',
+    ethnic: '朝鲜族'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Georgia',
-      city: 'Atlanta',
-      street: '4894  Lakeland Park Drive'
-    },
-    avatarUrl: '/static/images/avatars/avatar_2.png',
+    id: 3,
     createdAt: 1555016400000,
-    email: 'alexa.richardson@devias.io',
+    email: 'alexa.richardson@qq.com',
     name: 'Alexa Richardson',
-    phone: '770-635-2682'
+    chineseClass: 'Class C',
+    hksLevel: 'Level C+',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Ohio',
-      city: 'Dover',
-      street: '4158  Hedge Street'
-    },
-    avatarUrl: '/static/images/avatars/avatar_5.png',
+    id: 4,
     createdAt: 1554930000000,
-    email: 'anje.keizer@devias.io',
+    email: 'anje.keizer@qq.com',
     name: 'Anje Keizer',
-    phone: '908-691-3242'
+    chineseClass: 'Class A',
+    hksLevel: 'Level A-',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Texas',
-      city: 'Dallas',
-      street: '75247'
-    },
-    avatarUrl: '/static/images/avatars/avatar_6.png',
+    id: 5,
     createdAt: 1554757200000,
-    email: 'clarke.gillebert@devias.io',
+    email: 'clarke.gillebert@qq.com',
     name: 'Clarke Gillebert',
-    phone: '972-333-4106'
+    chineseClass: 'Class C',
+    hksLevel: 'Level A+',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'California',
-      city: 'Bakerfield',
-      street: '317 Angus Road'
-    },
-    avatarUrl: '/static/images/avatars/avatar_1.png',
+    id: 6,
     createdAt: 1554670800000,
-    email: 'adam.denisov@devias.io',
+    email: 'adam.denisov@qq.com',
     name: 'Adam Denisov',
-    phone: '858-602-3409'
+    chineseClass: 'Class C',
+    hksLevel: 'Level D',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'California',
-      city: 'Redondo Beach',
-      street: '2188  Armbrester Drive'
-    },
-    avatarUrl: '/static/images/avatars/avatar_7.png',
+    id: 7,
     createdAt: 1554325200000,
-    email: 'ava.gregoraci@devias.io',
+    email: 'ava.gregoraci@qq.com',
     name: 'Ava Gregoraci',
-    phone: '415-907-2647'
+    chineseClass: 'Class B',
+    hksLevel: 'Level C',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Nevada',
-      city: 'Las Vegas',
-      street: '1798  Hickory Ridge Drive'
-    },
-    avatarUrl: '/static/images/avatars/avatar_8.png',
+    id: 8,
     createdAt: 1523048400000,
-    email: 'emilee.simchenko@devias.io',
+    email: 'emilee.simchenko@qq.com',
     name: 'Emilee Simchenko',
-    phone: '702-661-1654'
+    chineseClass: 'Class A',
+    hksLevel: 'Level A',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Michigan',
-      city: 'Detroit',
-      street: '3934  Wildrose Lane'
-    },
-    avatarUrl: '/static/images/avatars/avatar_9.png',
+    id: 9,
     createdAt: 1554702800000,
-    email: 'kwak.seong.min@devias.io',
+    email: 'kwak.seong.min@qq.com',
     name: 'Kwak Seong-Min',
-    phone: '313-812-8947'
+    chineseClass: 'Class B',
+    hksLevel: 'Level C',
+    ethnic: 'unknown'
   },
   {
-    id: uuid(),
-    address: {
-      country: 'USA',
-      state: 'Utah',
-      city: 'Salt Lake City',
-      street: '368 Lamberts Branch Road'
-    },
-    avatarUrl: '/static/images/avatars/avatar_10.png',
+    id: 10,
     createdAt: 1522702800000,
-    email: 'merrile.burgett@devias.io',
+    email: 'merrile.burgett@qq.com',
     name: 'Merrile Burgett',
-    phone: '801-301-7894'
+    chineseClass: 'Class A',
+    hksLevel: 'Level D',
+    ethnic: 'unknown'
   }
 ]

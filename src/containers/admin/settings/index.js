@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Box, Container, makeStyles } from '@material-ui/core'
 import Page from 'components/Page'
-import Results from './Results'
-import Toolbar from './Toolbar'
-import data from './data'
+// import Notifications from './Notifications'
+import Password from './Password'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -14,20 +13,19 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Users = props => {
+const Settings = () => {
   const classes = useStyles()
-  const [users] = useState(data)
 
   return (
-    <Page className={classes.root} title="Customers">
-      <Container maxWidth={false}>
-        <Toolbar />
+    <Page className={classes.root} title="Settings">
+      <Container maxWidth="lg">
+        {/*<Notifications />*/}
         <Box mt={3}>
-          <Results users={users} history={props.history} />
+          <Password />
         </Box>
       </Container>
     </Page>
   )
 }
 
-export default Users
+export default Settings

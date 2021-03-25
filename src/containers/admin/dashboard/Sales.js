@@ -1,6 +1,4 @@
 import React from 'react'
-import clsx from 'clsx'
-import PropTypes from 'prop-types'
 import { Bar } from 'react-chartjs-2'
 import { Box, Button, Card, CardContent, CardHeader, Divider, useTheme, makeStyles, colors } from '@material-ui/core'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
@@ -10,7 +8,7 @@ const useStyles = makeStyles(() => ({
   root: {}
 }))
 
-const Sales = ({ className, ...rest }) => {
+const Sales = props => {
   const classes = useStyles()
   const theme = useTheme()
 
@@ -86,7 +84,7 @@ const Sales = ({ className, ...rest }) => {
   }
 
   return (
-    <Card className={clsx(classes.root, className)} {...rest}>
+    <Card className={classes.root}>
       <CardHeader
         action={
           <Button endIcon={<ArrowDropDownIcon />} size="small" variant="text">
@@ -103,7 +101,15 @@ const Sales = ({ className, ...rest }) => {
       </CardContent>
       <Divider />
       <Box display="flex" justifyContent="flex-end" p={2}>
-        <Button color="primary" endIcon={<ArrowRightIcon />} size="small" variant="text">
+        <Button
+          color="primary"
+          endIcon={<ArrowRightIcon />}
+          size="small"
+          variant="text"
+          onClick={() => {
+            props.history.push('/admin/papers')
+          }}
+        >
           Overview
         </Button>
       </Box>
@@ -111,8 +117,8 @@ const Sales = ({ className, ...rest }) => {
   )
 }
 
-Sales.propTypes = {
-  className: PropTypes.string
-}
+// Sales.propTypes = {
+//   className: PropTypes.string
+// }
 
 export default Sales

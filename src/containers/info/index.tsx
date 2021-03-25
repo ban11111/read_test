@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export default function InfoPage(p: any) {
+export default function InfoPage(props: any) {
   const classes = useStyles()
 
   return (
@@ -138,8 +138,8 @@ export default function InfoPage(p: any) {
             color="primary"
             className={classes.submit}
             onClick={() => {
-              console.log('hook props', p)
-              p.props.history.push('/demo')
+              console.log('hook props', props)
+              props.history.push('/demo')
             }}
           >
             Sign Up / Start ?
@@ -155,7 +155,7 @@ export default function InfoPage(p: any) {
       </div>
       <Button
         onClick={() => {
-          p.props.history.push('/admin/login')
+          props.history.push('/admin/login')
         }}
       >
         临时转到 管理员Login 页面
