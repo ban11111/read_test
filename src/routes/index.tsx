@@ -8,6 +8,7 @@ import Dashboard from 'containers/admin/dashboard'
 import Users from 'containers/admin/users'
 import Settings from 'containers/admin/settings'
 import Papers from 'containers/admin/papers'
+import Detail from 'containers/admin/users/detail'
 
 const LoginContainer = lazy(() => import('containers/login'))
 
@@ -27,11 +28,11 @@ export class Routes extends React.Component<any> {
           <Route path="/admin/dashboard">
             <DashboardLayout components={Dashboard} {...this.props} />
           </Route>
-          <Route path="/admin/users">
+          <Route path="/admin/users" exact>
             <DashboardLayout components={Users} {...this.props} />
           </Route>
           <Route path="/admin/users/:uid">
-            <DashboardLayout components={Users} />
+            <DashboardLayout components={Detail} />
           </Route>
           <Route path="/admin/papers">
             <DashboardLayout components={Papers} {...this.props} />
