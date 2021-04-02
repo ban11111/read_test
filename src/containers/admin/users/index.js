@@ -22,7 +22,8 @@ const Users = props => {
     <Page className={classes.root} title="Customers">
       <Container maxWidth={false}>
         <Toolbar />
-        <Box mt={3}>
+        <Box mt={3} style={{ minWidth: 1099 }}>
+          {/*// todo*/}
           <Results users={users} history={props.history} />
         </Box>
       </Container>

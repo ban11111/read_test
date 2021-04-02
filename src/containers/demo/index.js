@@ -7,9 +7,8 @@ import 'recorder-core/src/engine/mp3'
 import 'recorder-core/src/engine/mp3-engine'
 import 'recorder-core/src/extensions/waveview'
 
-import { makeStyles, styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
+import { styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
 import { blue, green, red } from '@material-ui/core/colors'
-// import CircularProgress from '@material-ui/core/CircularProgress'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import {
   Fab,
@@ -24,43 +23,6 @@ import {
   MenuItem
 } from '@material-ui/core'
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons'
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  word: {
-    fontSize: 'x-large',
-    fontFamily: 'monospace',
-    fontWeight: 'bold'
-  },
-  wrapper: {
-    margin: theme.spacing(1),
-    position: 'relative'
-  },
-  buttonSuccess: {
-    backgroundColor: green[500],
-    '&:hover': {
-      backgroundColor: green[700]
-    }
-  },
-  fabProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: -6,
-    left: -6,
-    zIndex: 1
-  },
-  buttonProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12
-  }
-}))
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -116,18 +78,17 @@ export default class Index extends Component {
       reRenderTimer: false
     }
     this.translationRef = React.createRef()
+    // this.wave
+    this.rec = Recorder({
+      type: 'mp3',
+      bitRate: defaultAudioConf.bitRate,
+      sampleRate: defaultAudioConf.sampleRate,
+      disableEnvInFix: false,
+      onProcess: (buffers, powerLevel, bufferDuration, bufferSampleRate) => {
+        this.wave.input(buffers[buffers.length - 1], powerLevel, bufferSampleRate) //输入音频数据，更新显示波形
+      }
+    })
   }
-
-  wave
-  rec = Recorder({
-    type: 'mp3',
-    bitRate: defaultAudioConf.bitRate,
-    sampleRate: defaultAudioConf.sampleRate,
-    disableEnvInFix: false,
-    onProcess: (buffers, powerLevel, bufferDuration, bufferSampleRate) => {
-      this.wave.input(buffers[buffers.length - 1], powerLevel, bufferSampleRate) //输入音频数据，更新显示波形
-    }
-  })
 
   renderVisualization = () => {
     return <div style={{ height: '50px' }} className="wave-box" />
@@ -160,7 +121,7 @@ export default class Index extends Component {
 
   uploadFile = (blob, duration) => {
     const formData = new FormData()
-    formData.append('record', blob, duration + '.mp3')
+    formData.append('record', blob, duration + '.mp3') // fileName 不重要,服务端自己设置文件名
     api.uploadAudio(formData).then(resp => {
       console.log('resp', resp)
     })
@@ -294,7 +255,7 @@ export default class Index extends Component {
     const recording = status === 'recording'
     return (
       <Container maxWidth="sm" className="demo-page">
-        <Grid container spacing={2} className={useStyles.wrapper} alignItems={'center'}>
+        <Grid container spacing={2} alignItems={'center'}>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             {!reRenderTimer && this.renderCountDown(wordIndex)}
           </Grid>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -12,6 +12,9 @@ import HeadsetMicOutlinedIcon from '@material-ui/icons/HeadsetMicOutlined'
 import Typography from '@material-ui/core/Typography'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
+import api from '../../api'
+
+// 本页面逻辑, 先登录(只用填email), 如果账户不存在则展示注册逻辑
 
 function Copyright() {
   return (
@@ -48,8 +51,54 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
+interface UserInfo {
+  email: string
+  name: string
+  chinese_class: string
+  hks_level: string
+  ethnic_background: string
+}
+
+type label = 'email' | 'name' | 'chinese_class' | 'hks_level' | 'ethnic_background'
+
 export default function InfoPage(props: any) {
   const classes = useStyles()
+  const [userInfo, setUserInfo] = useState({
+    email: '',
+    name: '',
+    chinese_class: '',
+    hks_level: '',
+    ethnic_background: ''
+  })
+  const [needSignUp, setNeedSignUp] = useState(false)
+
+  const onEdit = (l: label) => (e: ChangeEvent<HTMLInputElement>) => {
+    const newUserInfo: UserInfo = userInfo
+    newUserInfo[l] = e.currentTarget.value
+    setUserInfo(newUserInfo)
+  }
+
+  const signUp = () => {
+    api.signUp(userInfo).then(resp => {
+      if (!resp.success) {
+        // todo, show Error
+      } else {
+        props.history.push('/instruction')
+      }
+    })
+  }
+
+  const signIn = () => {
+    api.signIn({ email: userInfo.email }).then(resp => {
+      if (!resp.success) {
+        // todo, show Error
+        // 根据返回值判断, 如果是用户不存在, 则转为注册页面
+        resp.data.user_not_exist ? setNeedSignUp(true) : console.log('todo: show error', resp)
+      } else {
+        props.history.push('/instruction')
+      }
+    })
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -64,55 +113,8 @@ export default function InfoPage(props: any) {
         <Typography component="h3" variant="subtitle1" style={{ color: 'grey' }}>
           Instructions: xxxx
         </Typography>
-        <form className={classes.form} noValidate>
+        <Box className={classes.form}>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                name="name"
-                variant="outlined"
-                required
-                fullWidth
-                id="name"
-                label="Name"
-                autoComplete="name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="chineseClass"
-                label="Chinese Class"
-                name="chineseClass"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField variant="outlined" required fullWidth id="hksLevel" label="HKS Level" name="hksLevel" />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="ethnicBackground"
-                label="Ethnic Background"
-                name="ethnicBackground"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-            </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -122,14 +124,69 @@ export default function InfoPage(props: any) {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-              />
+                autoFocus
+                onChange={onEdit('email')}
+              >
+                {userInfo.email}
+              </TextField>
             </Grid>
-            {/*<Grid item xs={12}>*/}
-            {/*  <FormControlLabel*/}
-            {/*    control={<Checkbox value="allowExtraEmails" color="primary" />}*/}
-            {/*    label="I want to receive inspiration, marketing promotions and updates via email."*/}
-            {/*  />*/}
-            {/*</Grid>*/}
+            {needSignUp && (
+              <>
+                <Grid item xs={12}>
+                  <TextField
+                    name="name"
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="name"
+                    label="Name"
+                    autoComplete="name"
+                    onChange={onEdit('name')}
+                  >
+                    {userInfo.name}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="chineseClass"
+                    label="Chinese Class"
+                    name="chineseClass"
+                    onChange={onEdit('chinese_class')}
+                  >
+                    {userInfo.chinese_class}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="hksLevel"
+                    label="HKS Level"
+                    name="hksLevel"
+                    onChange={onEdit('hks_level')}
+                  >
+                    {userInfo.hks_level}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="ethnicBackground"
+                    label="Ethnic Background"
+                    name="ethnicBackground"
+                    onChange={onEdit('ethnic_background')}
+                  >
+                    {userInfo.ethnic_background}
+                  </TextField>
+                </Grid>
+              </>
+            )}
           </Grid>
           <Button
             type="submit"
@@ -137,29 +194,19 @@ export default function InfoPage(props: any) {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={() => {
-              console.log('hook props', props)
-              props.history.push('/demo')
-            }}
+            onClick={needSignUp ? signUp : signIn}
           >
-            Sign Up / Start ?
+            {needSignUp ? 'sign up' : 'sign in'}
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#" variant="body2">
-                Already have an account? Sign in
+              <Link href="/instruction" variant="body2">
+                临时转到instruction页面
               </Link>
             </Grid>
           </Grid>
-        </form>
+        </Box>
       </div>
-      <Button
-        onClick={() => {
-          props.history.push('/admin/login')
-        }}
-      >
-        临时转到 管理员Login 页面
-      </Button>
       <Box mt={5}>
         <Copyright />
       </Box>

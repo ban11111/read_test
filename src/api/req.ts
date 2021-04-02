@@ -7,13 +7,13 @@ export interface ReqType {
 
 export interface Response {
   success: boolean
-  msg?: string
+  info?: string
   data: any
 }
 
 export interface Res<T> {
   success: boolean
-  info: string
+  info?: string
   data?: T
 }
 
@@ -27,7 +27,6 @@ export const createRequest = (): ReqType => {
       Token: sessionStorage.getItem('token')
     }
   }
-  // 设置请求拦截，在请求头中添加产品名称
   const instance = axios.create(common)
   return {
     http: instance,
@@ -42,7 +41,7 @@ export const wrapSend = async <T>(requestFunc: requestFun, type?: string): Promi
     const { data } = res
     response = {
       success: type ? true : data.success,
-      info: data.msg,
+      info: data.info,
       data: type ? data : data.data
     }
   } catch (err) {
@@ -50,7 +49,7 @@ export const wrapSend = async <T>(requestFunc: requestFun, type?: string): Promi
     if (err.response.status === 403) {
       setTimeout(() => {
         sessionStorage.clear()
-        window.location.replace('/login')
+        window.location.replace('/admin/login')
       }, 2000)
       return {
         info: 'Your login information is invalid, please login again!',
@@ -59,7 +58,7 @@ export const wrapSend = async <T>(requestFunc: requestFun, type?: string): Promi
     }
     response = {
       success: data.success,
-      info: data.err_msg,
+      info: err.response.status + ' ' + err.response.statusText,
       data: data
     }
   }

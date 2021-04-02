@@ -9,6 +9,7 @@ import Users from 'containers/admin/users'
 import Settings from 'containers/admin/settings'
 import Papers from 'containers/admin/papers'
 import Detail from 'containers/admin/users/detail'
+import InstructionPage from 'containers/instruction'
 
 const LoginContainer = lazy(() => import('containers/login'))
 
@@ -20,6 +21,9 @@ export class Routes extends React.Component<any> {
           <Redirect exact={true} from="/" to="/info" />
           <Route path="/info">
             <InfoPage {...this.props} />
+          </Route>
+          <Route path="/instruction">
+            <InstructionPage {...this.props} />
           </Route>
           <Route path="/demo" component={DemoPage} />
           <Route path="/finish" component={FinishPage} />
