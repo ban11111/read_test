@@ -3,8 +3,6 @@ import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TextField from '@material-ui/core/TextField'
-// import FormControlLabel from '@material-ui/core/FormControlLabel'
-// import Checkbox from '@material-ui/core/Checkbox'
 import Link from '@material-ui/core/Link'
 import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
@@ -12,7 +10,9 @@ import HeadsetMicOutlinedIcon from '@material-ui/icons/HeadsetMicOutlined'
 import Typography from '@material-ui/core/Typography'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
-import api from '../../api'
+import api from 'api'
+import { toast } from 'react-toastify'
+import { KeyUserInfo, storageSet } from 'global/storage'
 
 // 本页面逻辑, 先登录(只用填email), 如果账户不存在则展示注册逻辑
 
@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface UserInfo {
-  email: string
+  email: string // 先简单粗暴, 直接用email当做唯一识别字段
   name: string
   chinese_class: string
   hks_level: string
@@ -81,8 +81,9 @@ export default function InfoPage(props: any) {
   const signUp = () => {
     api.signUp(userInfo).then(resp => {
       if (!resp.success) {
-        // todo, show Error
+        toast.error('🚀' + resp.info)
       } else {
+        storageSet(KeyUserInfo, userInfo)
         props.history.push('/instruction')
       }
     })
@@ -91,10 +92,12 @@ export default function InfoPage(props: any) {
   const signIn = () => {
     api.signIn({ email: userInfo.email }).then(resp => {
       if (!resp.success) {
-        // todo, show Error
         // 根据返回值判断, 如果是用户不存在, 则转为注册页面
-        resp.data.user_not_exist ? setNeedSignUp(true) : console.log('todo: show error', resp)
+        resp.data.user_not_exist ? setNeedSignUp(true) : toast.error('🚀' + resp.info)
+        // todo, 临时, 记得删除
+        setNeedSignUp(true)
       } else {
+        storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
         props.history.push('/instruction')
       }
     })
@@ -110,9 +113,9 @@ export default function InfoPage(props: any) {
         <Typography component="h1" variant="h5">
           Chinese Character Reading Test
         </Typography>
-        <Typography component="h3" variant="subtitle1" style={{ color: 'grey' }}>
-          Instructions: xxxx
-        </Typography>
+        {/*<Typography component="h3" variant="subtitle1" style={{ color: 'grey' }}>*/}
+        {/*  Instructions: xxxx*/}
+        {/*</Typography>*/}
         <Box className={classes.form}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -200,7 +203,13 @@ export default function InfoPage(props: any) {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="/instruction" variant="body2">
+              <Link
+                href="/instruction"
+                variant="body2"
+                onClick={() => {
+                  storageSet(KeyUserInfo, userInfo)
+                }}
+              >
                 临时转到instruction页面
               </Link>
             </Grid>

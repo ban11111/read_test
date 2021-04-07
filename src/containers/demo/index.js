@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
 import './index.css'
 import api from '../../api'
-
 import Recorder from 'recorder-core'
 import 'recorder-core/src/engine/mp3'
 import 'recorder-core/src/engine/mp3-engine'
 import 'recorder-core/src/extensions/waveview'
-
 import { styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
 import { blue, green, red } from '@material-ui/core/colors'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
@@ -23,6 +21,7 @@ import {
   MenuItem
 } from '@material-ui/core'
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons'
+import { KeyUserInfo, storageGet } from '../../global/storage'
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -88,6 +87,7 @@ export default class Index extends Component {
         this.wave.input(buffers[buffers.length - 1], powerLevel, bufferSampleRate) //输入音频数据，更新显示波形
       }
     })
+    this.userInfo = storageGet(KeyUserInfo)
   }
 
   renderVisualization = () => {
@@ -103,7 +103,11 @@ export default class Index extends Component {
   // }
 
   componentDidMount() {
-    console.log('正在打开录音，请求麦克风权限...')
+    console.log('正在打开录音，请求麦克风权限...', this.userInfo)
+    if (this.userInfo == null) {
+      this.props.history.push('/info')
+      return
+    }
     this.rec.open(
       () => {
         clearTimeout(this.timeoutFn)

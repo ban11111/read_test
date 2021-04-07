@@ -37,6 +37,11 @@ export class Api {
   uploadAudio = (payload: any) => {
     return this.post(`/api/v1/upload`, payload)
   }
+
+  // =====  admin  =====
+  adminLogin = (payload: any) => {
+    return this.post(`/admin/login`, payload)
+  }
 }
 
 const getAPI = (request: ReqType) => new Api(request)

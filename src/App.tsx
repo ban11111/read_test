@@ -6,6 +6,8 @@ import RootStore from './stores/root'
 import { Route, Router } from 'react-router-dom'
 import Routes from './routes'
 import CssBaseline from '@material-ui/core/CssBaseline'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const browserHistory = createBrowserHistory()
 const routingStore = new RouterStore()
@@ -16,6 +18,17 @@ class App extends React.Component {
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <CssBaseline />
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <Provider {...RootStore}>
           <Router history={history}>
             <Route component={Routes} />

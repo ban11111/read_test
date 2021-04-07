@@ -11,7 +11,8 @@ import Papers from 'containers/admin/papers'
 import Detail from 'containers/admin/users/detail'
 import InstructionPage from 'containers/instruction'
 
-const LoginContainer = lazy(() => import('containers/login'))
+// const LoginContainer = lazy(() => import('containers/login'))
+const AdminLogin = lazy(() => import('containers/admin/login'))
 
 export class Routes extends React.Component<any> {
   render() {
@@ -28,7 +29,7 @@ export class Routes extends React.Component<any> {
           <Route path="/demo" component={DemoPage} />
           <Route path="/finish" component={FinishPage} />
           <Redirect exact={true} from="/admin" to="/admin/login" />
-          <Route path="/admin/login" component={LoginContainer} />
+          <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/dashboard">
             <DashboardLayout components={Dashboard} {...this.props} />
           </Route>
