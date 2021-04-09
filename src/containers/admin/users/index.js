@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Container, makeStyles } from '@material-ui/core'
 import Page from 'components/Page'
 import Results from './Results'
 import Toolbar from './Toolbar'
-import data from './data'
+import api from '../../../api'
+import { toast } from 'react-toastify'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,14 +17,28 @@ const useStyles = makeStyles(theme => ({
 
 const Users = props => {
   const classes = useStyles()
-  const [users] = useState(data)
+  const [users, setUsers] = useState([])
+
+  const getUsers = () => {
+    api.QueryUsers().then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        setUsers(res.data)
+      }
+    })
+  }
+
+  useEffect(() => {
+    getUsers()
+  }, [])
 
   return (
     <Page className={classes.root} title="Customers">
       <Container maxWidth={false}>
         <Toolbar />
         <Box mt={3} style={{ minWidth: 1099 }}>
-          {/*// todo*/}
+          {/*// todo dont use another page, use sub component */}
           <Results users={users} history={props.history} />
         </Box>
       </Container>

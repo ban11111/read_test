@@ -37,7 +37,7 @@ export class Routes extends React.Component<any> {
             <DashboardLayout components={Users} {...this.props} />
           </Route>
           <Route path="/admin/users/:uid">
-            <DashboardLayout components={Detail} />
+            <DashboardLayout components={Detail} {...this.props} />
           </Route>
           <Route path="/admin/papers">
             <DashboardLayout components={Papers} {...this.props} />

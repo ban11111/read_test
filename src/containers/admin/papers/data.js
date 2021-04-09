@@ -8,14 +8,14 @@ export const columns = [
 export const data = [
   {
     id: 1,
-    createdAt: 1555016400000,
+    created_at: 1555016400000,
     name: 'Paper for test',
-    words: ['字1', '字2', '字3', '字4', '字5', '字6']
+    words: '字1 字2 字3 字4 字5 字6'
   },
   {
     id: 2,
-    createdAt: 1555016400000,
+    created_at: 1555016400000,
     name: 'Paper 1',
-    words: ['字1', '字2', '字3', '字4', '字5', '字6']
+    words: '字6 字5 字4 字3 字2 字1'
   }
 ]

@@ -8,20 +8,11 @@ import 'recorder-core/src/extensions/waveview'
 import { styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
 import { blue, green, red } from '@material-ui/core/colors'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
-import {
-  Fab,
-  Button,
-  Container,
-  Grid,
-  Paper,
-  MobileStepper,
-  TextField,
-  InputLabel,
-  Select,
-  MenuItem
-} from '@material-ui/core'
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons'
+import { Button, Container, Grid, Paper, MobileStepper, TextField, IconButton } from '@material-ui/core'
+import { KeyboardArrowLeft, KeyboardArrowRight, Mic, MicNone } from '@material-ui/icons'
 import { KeyUserInfo, storageGet } from '../../global/storage'
+import { toast } from 'react-toastify'
+import moment from 'moment'
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -67,17 +58,24 @@ export default class Index extends Component {
     super(props)
     this.state = {
       rec: null,
+      begin: false,
       status: 'init',
+      audioBlob: null,
       src: '',
       input: '',
       audioConf: defaultAudioConf,
       wordIndex: 0,
-      words: ['要读的字', '字2', '字3', '后面会在', '管理页面开放配置'],
-      answers: [], // {upload_url:"s3上传路径", translation:"翻译"}
-      reRenderTimer: false
+      words: [' '],
+      translation: [], // translation:["翻译"]
+      reRenderTimer: false,
+      paper_info: {
+        paper_name: '',
+        paper_version: '',
+        paper_id: 0,
+        interval: 10 // 秒
+      }
     }
     this.translationRef = React.createRef()
-    // this.wave
     this.rec = Recorder({
       type: 'mp3',
       bitRate: defaultAudioConf.bitRate,
@@ -94,47 +92,73 @@ export default class Index extends Component {
     return <div style={{ height: '50px' }} className="wave-box" />
   }
 
-  timeoutFn = setTimeout(() => {
-    console.log('无法录音：权限请求被忽略（超时假装手动点击了确认对话框）', 1)
-  }, 10000)
-
-  // shouldComponentUpdate(nextProps, nextState, nextContext) {
-  //   return nextState.wordIndex !== this.state.wordIndex
-  // }
+  getBasicInfo = () => {
+    api.getBasicInfo(null).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        this.setState({
+          audioConf: {
+            bitRate: res.data.global_setting['BitRate'], // kbps
+            sampleRate: res.data.global_setting['SampleRate'] // hz
+          },
+          words: res.data.current_paper.words.split(RegExp('[ \t\n]+')),
+          paper_info: {
+            paper_name: res.data.current_paper.name,
+            paper_version: res.data.current_paper.version,
+            paper_id: res.data.current_paper.id,
+            interval: res.data.current_paper.interval
+          },
+          begin: true
+        })
+        this.beginTime = moment() // 用于计算每道题耗时
+      }
+    })
+  }
 
   componentDidMount() {
-    console.log('正在打开录音，请求麦克风权限...', this.userInfo)
     if (this.userInfo == null) {
       this.props.history.push('/info')
       return
     }
+    this.getBasicInfo()
     this.rec.open(
       () => {
-        clearTimeout(this.timeoutFn)
-        console.log('已打开录音，可以点击开始了', 2)
         this.wave = Recorder.WaveView({ elem: '.wave-box' }) // 创建wave对象
         this.rec.close()
       },
       (msg, isUserNotAllow) => {
-        //用户拒绝未授权或不支持
-        clearTimeout(this.timeoutFn)
-        console.log((isUserNotAllow ? 'UserNotAllow，' : '') + '无法录音:' + msg, 1)
+        isUserNotAllow //用户拒绝未授权或不支持
+          ? toast.error('please allow the mic permission, refresh or restart the browser')
+          : toast.error('your device or web browser do not support audio recording, msg:' + msg)
       }
     )
   }
 
-  uploadFile = (blob, duration) => {
+  uploadFile = (blob, duration, next) => {
     const formData = new FormData()
-    formData.append('record', blob, duration + '.mp3') // fileName 不重要,服务端自己设置文件名
+    if (blob) {
+      formData.append('record', blob, duration + '.mp3') // fileName 不重要,服务端自己设置文件名
+    }
+    formData.append('file_ext', 'mp3')
+    formData.append('paper_name', this.state.paper_info.paper_name)
+    formData.append('paper_version', this.state.paper_info.paper_version)
+    formData.append('paper_id', this.state.paper_info.paper_id + '')
+    formData.append('uid', this.userInfo.id)
+    formData.append('word_index', this.state.wordIndex)
+    formData.append('word', this.state.words[this.state.wordIndex])
+    formData.append('translation', this.state.input)
+    formData.append('duration', duration)
     api.uploadAudio(formData).then(resp => {
-      console.log('resp', resp)
+      if (!resp.success) {
+        toast.error(resp.info + ' -- if you cant go to next word, try refresh the page')
+      } else {
+        next()
+      }
     })
   }
 
   recStart = () => {
-    // if (this.rec && this.rec.IsOpen()) {
-    //   this.rec.close()
-    // }
     this.rec = Recorder({
       type: 'mp3',
       bitRate: this.state.audioConf.bitRate,
@@ -169,7 +193,6 @@ export default class Index extends Component {
       document.onmouseup = null
     })
     this.recStop()
-    // console.log('????????????????', this.translationRef)
     this.translationRef.current.lastChild.firstChild.focus()
   }
 
@@ -181,48 +204,52 @@ export default class Index extends Component {
   recStop() {
     this.rec.stop(
       (blob, duration) => {
-        this.rec.close() //释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时手机端播放音频有杂音
-        this.uploadFile(blob, duration)
-        this.setState({ src: window.URL.createObjectURL(blob) }, () => {
-          console.log('src', this.state.src)
-        })
-        // this.rec = null
+        this.rec.close() // 释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时手机端播放音频有杂音
+        console.log('audio duration: ', duration)
+        this.setState({ audioBlob: blob, src: window.URL.createObjectURL(blob) })
       },
       msg => {
         console.log('录音失败:' + msg, 1)
         this.rec.close() //可以通过stop方法的第3个参数来自动调用close
-        // this.rec = null
       }
     )
   }
 
   playAndStop = () => {
-    this.refs.audio.play()
+    this.refs.audioControl.play()
   }
 
-  onClickNext = () => {
-    if (this.state.wordIndex >= this.state.words.length - 1) {
-      this.props.history.push('/finish')
-      return
-    }
-    this.setState(
-      {
-        wordIndex: this.state.wordIndex + 1,
-        reRenderTimer: true,
-        answers: this.state.answers.concat({ upload_url: 'todo', translation: this.state.input })
-      },
-      () => {
-        this.setState({ reRenderTimer: false, src: '', input: '' })
+  onNext = duration => () => {
+    this.uploadFile(this.state.audioBlob, duration, () => {
+      window.URL.revokeObjectURL(this.state.src) // 清除 dataUrl
+      if (this.state.wordIndex >= this.state.words.length - 1) {
+        this.props.history.push('/finish')
+        return
       }
-    )
-  }
-  onClickBack = () => {
-    if (this.state.wordIndex <= 0) {
-      return
-    }
-    this.setState({ wordIndex: this.state.wordIndex - 1, reRenderTimer: true }, () => {
-      this.setState({ reRenderTimer: false })
+      this.setState(
+        {
+          wordIndex: this.state.wordIndex + 1,
+          reRenderTimer: true,
+          translation: this.state.translation.concat(this.state.input),
+          blob: null,
+          src: '',
+          input: ''
+        },
+        () => {
+          this.beginTime = moment() // 用于计算每道题耗时
+          this.setState({ reRenderTimer: false })
+        }
+      )
     })
+  }
+
+  onClickBack = () => {
+    // if (this.state.wordIndex <= 0) {
+    //   return
+    // }
+    // this.setState({ wordIndex: this.state.wordIndex - 1, reRenderTimer: true }, () => {
+    //   this.setState({ reRenderTimer: false })
+    // })
   }
 
   updateAudioConf = (sampleRate, bitRate) => {
@@ -230,10 +257,11 @@ export default class Index extends Component {
   }
 
   renderCountDown = wordIndex => {
+    return <></>
     return (
       <CountdownCircleTimer
         isPlaying={true}
-        duration={10}
+        duration={this.state.paper_info.interval}
         size={60}
         strokeWidth={8}
         colors={[
@@ -243,7 +271,7 @@ export default class Index extends Component {
         ]}
         onComplete={totalElapsedTime => {
           console.log(totalElapsedTime, wordIndex, 'on complete')
-          this.onClickNext()
+          this.onNext(this.state.paper_info.interval * 1000)()
         }}
       >
         {({ remainingTime }) => {
@@ -254,9 +282,12 @@ export default class Index extends Component {
   }
 
   render() {
-    const { status, src, words, wordIndex, audioConf, reRenderTimer } = this.state
+    const { begin, status, src, words, wordIndex, reRenderTimer } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
+    if (!begin) {
+      return <>{this.renderVisualization()}</>
+    }
     return (
       <Container maxWidth="sm" className="demo-page">
         <Grid container spacing={2} alignItems={'center'}>
@@ -268,8 +299,33 @@ export default class Index extends Component {
               <Word>{currentWord}</Word>
             </div>
           </Grid>
+          {/*<Grid item xs={2}>*/}
+          {/*  <Fab*/}
+          {/*    className="nocopy"*/}
+          {/*    variant="extended"*/}
+          {/*    onMouseDown={this.mouseDown}*/}
+          {/*    onTouchStart={this.touchDown}*/}
+          {/*    onTouchEnd={this.touchUp}*/}
+          {/*    onContextMenu={e => {*/}
+          {/*      e.preventDefault()*/}
+          {/*    }}*/}
+          {/*    size="medium"*/}
+          {/*    color={recording ? 'default' : 'primary'}*/}
+          {/*  >*/}
+          {/*    {recording ? 'Hold' : 'Hold'}*/}
+          {/*  </Fab>*/}
+          {/*</Grid>*/}
+          <Grid item xs={10}>
+            {this.renderVisualization()}
+          </Grid>
           <Grid item xs={2}>
-            <Fab
+            <Button color="secondary" variant="contained" onClick={this.playAndStop} style={{ float: 'right' }}>
+              Play
+            </Button>
+          </Grid>
+          <audio ref="audioControl" src={src} />
+          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+            <IconButton
               className="nocopy"
               variant="extended"
               onMouseDown={this.mouseDown}
@@ -281,27 +337,17 @@ export default class Index extends Component {
               size="medium"
               color={recording ? 'default' : 'primary'}
             >
-              {recording ? '松开\n结束' : '按住\n录音'}
-            </Fab>
-          </Grid>
-          <Grid item xs={8}>
-            {this.renderVisualization()}
-          </Grid>
-          <Grid item xs={2}>
-            <Button color="secondary" variant="contained" onClick={this.playAndStop} style={{ float: 'right' }}>
-              Play
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <audio controls ref="audio" src={src} />
+              {recording ? <Mic /> : <MicNone />}
+            </IconButton>
           </Grid>
 
           <Grid item xs={12}>
             <ValidationTextField
               ref={this.translationRef}
               label="Input translation here"
-              required
               fullWidth
+              required
+              autoComplete="off"
               variant="outlined"
               id="validation-outlined-input"
               value={this.state.input}
@@ -317,7 +363,7 @@ export default class Index extends Component {
               position="static"
               activeStep={wordIndex}
               nextButton={
-                <Button size="small" onClick={this.onClickNext}>
+                <Button size="small" onClick={this.onNext(moment().diff(this.beginTime, 'milliseconds'))}>
                   {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
                   {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                 </Button>
@@ -328,41 +374,6 @@ export default class Index extends Component {
                   Back
                 </Button>
               }
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <InputLabel>采样率</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={audioConf.sampleRate}
-              onChange={v => {
-                this.updateAudioConf(v.target.value, audioConf.bitRate)
-              }}
-            >
-              <MenuItem value={8000}>8000</MenuItem>
-              <MenuItem value={11025}>11025</MenuItem>
-              <MenuItem value={16000}>16000</MenuItem>
-              <MenuItem value={22050}>22050</MenuItem>
-              <MenuItem value={24000}>24000</MenuItem>
-              <MenuItem value={44100}>44100</MenuItem>
-              <MenuItem value={48000}>44100</MenuItem>
-              <MenuItem value={50000}>50000</MenuItem>
-              <MenuItem value={96000}>96000</MenuItem>
-            </Select>
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="比特率"
-              type="number"
-              InputLabelProps={{
-                shrink: true
-              }}
-              variant="filled"
-              value={audioConf.bitRate}
-              onChange={v => {
-                this.updateAudioConf(audioConf.sampleRate, v.target.value)
-              }}
             />
           </Grid>
         </Grid>

@@ -1,44 +1,155 @@
-import React from 'react'
-import { Button, Container, Grid, Popover, TextareaAutosize, Typography } from '@material-ui/core'
+import React, { useEffect, useState } from 'react'
+import {
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fab,
+  Grid,
+  IconButton,
+  InputBase,
+  InputLabel,
+  makeStyles,
+  OutlinedInput,
+  TextareaAutosize,
+  TextField
+} from '@material-ui/core'
+import { toast } from 'react-toastify'
+import api from 'api'
+import { Input } from 'antd'
+
+const { TextArea } = Input
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    '& > *': {
+      margin: theme.spacing(0.5)
+    }
+  },
+  chip: {
+    margin: theme.spacing(0.5)
+  },
+  input: {
+    marginLeft: theme.spacing(1),
+    flex: 1
+  }
+}))
 
 const Editor = props => {
+  const classes = useStyles()
+  const [words, setWords] = useState('') // {key:index, label:word}
+  const [interval, setInterval] = useState(0)
+
+  const onUpdateWords = () => {
+    api.editPaper({ ...props.data, words: words, interval: interval }).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        toast.success('updated!')
+        props.refreshPaper()
+        props.onClickExit()
+      }
+    })
+  }
+
+  const onUpdateInterval = e => {
+    setInterval(parseInt(e.currentTarget.value))
+  }
+
+  // useEffect(() => {
+  //   if (props.data) {
+  //     setWords(props.data.words)
+  //   }
+  // }, [props.data])
+
+  const editWords = e => {
+    setWords(e.currentTarget.value)
+  }
+
+  // const handleAddWord = e => {
+  //   setWords(e.currentTarget.value)
+  // }
+  //
+  // const handleDeleteWord = chipToDelete => () => {
+  //   // setWords(words => words.filter((word, i) => i !== chipToDelete))
+  //   setWords(words =>
+  //     words
+  //       .split(' ')
+  //       .filter((word, i) => i !== chipToDelete)
+  //       .join(' ')
+  //   )
+  // }
+
   return (
-    <Container>
-      <Popover
-        open={props.open}
-        // anchorEl={anchorEl}
-        // onClose={handleClose}
-        anchorReference="anchorPosition"
-        anchorPosition={{ top: 200, left: 400 }}
-        anchorOrigin={{
-          vertical: 'center',
-          horizontal: 'center'
-        }}
-        transformOrigin={{
-          vertical: 'center',
-          horizontal: 'center'
-        }}
-      >
-        <Grid container>
-          <Grid item xs={9}>
-            <Typography variant="h5">{(props.data && props.data.name) || ''}</Typography>
-          </Grid>
-          <Grid item xs={3}>
-            <Button onClick={props.onClickExit}>X</Button>
-          </Grid>
-          <Grid item xs={9}>
-            <TextareaAutosize
-              rowsMin={3}
-              placeholder="edit words here"
-              defaultValue={(props.data && props.data.words) || ''}
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <Button>ok</Button>
-          </Grid>
-        </Grid>
-      </Popover>
-    </Container>
+    <Grid container>
+      <Grid item xs={12}>
+        <Dialog
+          maxWidth="md"
+          fullWidth
+          open={props.open}
+          onClose={props.onClickExit}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            Id: {(props.data && props.data.id) || 0}; PaperName: {(props.data && props.data.name) || ''}
+          </DialogTitle>
+          <DialogContent className={classes.root}>
+            <Grid container>
+              <Grid item xs={2}>
+                <InputLabel>Interval (per/s)</InputLabel>
+              </Grid>
+              <Grid item xs={10} style={{ marginBottom: 20 }}>
+                <TextField
+                  type="number"
+                  variant="standard"
+                  defaultValue={props.data && props.data.interval}
+                  onChange={onUpdateInterval}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <InputLabel>Words</InputLabel>
+              </Grid>
+              <Grid item xs={10}>
+                <TextArea
+                  placeholder="you can edit words here"
+                  autoSize
+                  defaultValue={props.data && props.data.words}
+                  onChange={editWords}
+                />
+              </Grid>
+            </Grid>
+
+            {/*{words.split(' ').map((word, i) => {*/}
+            {/*  return (*/}
+            {/*    <li key={i}>*/}
+            {/*      <Chip label={word} onDelete={handleDeleteWord(i)} className={classes.chip} />*/}
+            {/*    </li>*/}
+            {/*  )*/}
+            {/*})}*/}
+            {/*<li>*/}
+            {/*  <OutlinedInput className={classes.input} placeholder="Add here" />*/}
+            {/*  <IconButton type="submit">*/}
+            {/*    <Plus />*/}
+            {/*  </IconButton>*/}
+            {/*</li>*/}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onUpdateWords} color="primary">
+              Ok
+            </Button>
+            <Button onClick={props.onClickExit} color="primary">
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Grid>
+    </Grid>
   )
 }
 

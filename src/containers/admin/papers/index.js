@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Button, Container, makeStyles, Typography } from '@material-ui/core'
 import { data } from './data'
 import Page from 'components/Page'
-// import { DataGrid } from '@material-ui/data-grid'
 import Result from './result'
 import Editor from './editor/editor'
+import api from 'api'
+import { toast } from 'react-toastify'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -17,8 +18,22 @@ const useStyles = makeStyles(theme => ({
 
 const Papers = () => {
   const classes = useStyles()
-  const [papers] = useState(data)
+  const [papers, setPapers] = useState(data)
+  const [activePaper, setActivePaper] = useState(data[0])
   const [addNew, setAddNew] = useState(false)
+
+  const getPapers = () => {
+    api.queryPapers().then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        setPapers(res.data.papers)
+        setActivePaper(res.data.active_paper)
+      }
+    })
+  }
+
+  useEffect(getPapers, [])
 
   const Add = () => {
     setAddNew(true)
@@ -39,11 +54,11 @@ const Papers = () => {
         </Box>
         <Box>
           <Typography color="textPrimary" variant="h5">
-            Current Paper: 这里显示当前生效试卷， ui待定
+            Active Paper: id({activePaper.id}): {activePaper.name}
           </Typography>
         </Box>
         <Box mt={3}>
-          <Result datas={papers} />
+          <Result datas={papers} refreshPaper={getPapers} />
         </Box>
       </Container>
     </Page>

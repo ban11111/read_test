@@ -26,12 +26,12 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Results = ({ className, datas, ...rest }) => {
+const Results = ({ className, datas, refreshPaper, ...rest }) => {
   const classes = useStyles()
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([])
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(0)
-  const [editProps, setEditProps] = useState({ open: false })
+  const [editProps, setEditProps] = useState({ open: false, refreshPaper: refreshPaper })
 
   const handleSelectAll = event => {
     let newSelectedCustomerIds
@@ -79,7 +79,7 @@ const Results = ({ className, datas, ...rest }) => {
 
   const handleEditClicked = e => {
     const dataIndex = e.currentTarget.value
-    setEditProps({ open: true, onClickExit: onClickEditExit, data: datas[dataIndex] })
+    setEditProps({ open: true, onClickExit: onClickEditExit, data: datas[dataIndex], refreshPaper: refreshPaper })
   }
 
   return (
@@ -101,6 +101,7 @@ const Results = ({ className, datas, ...rest }) => {
                 <TableCell>Id</TableCell>
                 <TableCell>CreatedAt</TableCell>
                 <TableCell>Name</TableCell>
+                <TableCell>Interval(/s)</TableCell>
                 <TableCell>Words</TableCell>
                 <TableCell align="center">Operation</TableCell>
               </TableRow>
@@ -116,17 +117,10 @@ const Results = ({ className, datas, ...rest }) => {
                     />
                   </TableCell>
                   <TableCell>{data.id}</TableCell>
-                  <TableCell>{moment(data.createdAt).format('DD/MM/YYYY')}</TableCell>
+                  <TableCell>{moment(data.created_at).format('YYYY-MM-DD hh:mm:ss')}</TableCell>
                   <TableCell>{data.name}</TableCell>
-                  <TableCell>
-                    {data.words.map((word, i) => {
-                      return (
-                        <span style={{ margin: 1 }} key={i}>
-                          {word}
-                        </span>
-                      )
-                    })}
-                  </TableCell>
+                  <TableCell>{data.interval}</TableCell>
+                  <TableCell>{data.words}</TableCell>
                   <TableCell align="center">
                     <ButtonGroup size="small">
                       <Button color="primary" onClick={handleEditClicked} value={index}>

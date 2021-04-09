@@ -33,6 +33,11 @@ export class Api {
     return this.post(`/api/v1/sign_in`, payload)
   }
 
+  // 获取做题基本信息
+  getBasicInfo = (payload: any) => {
+    return this.post(`/api/v1/get_basic_info`, payload)
+  }
+
   // 上传音频文件
   uploadAudio = (payload: any) => {
     return this.post(`/api/v1/upload`, payload)
@@ -40,7 +45,35 @@ export class Api {
 
   // =====  admin  =====
   adminLogin = (payload: any) => {
-    return this.post(`/admin/login`, payload)
+    return this.post(`/api/v1/admin/login`, payload)
+  }
+
+  queryPapers = () => {
+    return this.post(`/api/v1/admin/query_papers`)
+  }
+
+  addPaper = (payload: any) => {
+    return this.post(`/api/v1/admin/add_paper`, payload)
+  }
+
+  editPaper = (payload: any) => {
+    return this.post(`/api/v1/admin/edit_paper`, payload)
+  }
+
+  QueryUsers = () => {
+    return this.post(`/api/v1/admin/query_users`)
+  }
+
+  QueryAnswers = (payload: any) => {
+    return this.post(`/api/v1/admin/query_answers`, payload)
+  }
+
+  querySettings = () => {
+    return this.post(`/api/v1/admin/query_settings`)
+  }
+
+  updateSetting = (payload: any) => {
+    return this.post(`/api/v1/admin/update_setting`, payload)
   }
 }
 

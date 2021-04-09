@@ -83,7 +83,7 @@ export default function InfoPage(props: any) {
       if (!resp.success) {
         toast.error('🚀' + resp.info)
       } else {
-        storageSet(KeyUserInfo, userInfo)
+        storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
         props.history.push('/instruction')
       }
     })
@@ -93,12 +93,15 @@ export default function InfoPage(props: any) {
     api.signIn({ email: userInfo.email }).then(resp => {
       if (!resp.success) {
         // 根据返回值判断, 如果是用户不存在, 则转为注册页面
-        resp.data.user_not_exist ? setNeedSignUp(true) : toast.error('🚀' + resp.info)
-        // todo, 临时, 记得删除
-        setNeedSignUp(true)
+        toast.error('🚀' + resp.info)
       } else {
-        storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
-        props.history.push('/instruction')
+        if (resp.data.user_not_exist) {
+          setNeedSignUp(true)
+        } else {
+          toast.info('🦄 welcome ' + resp.data.user.name)
+          storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
+          props.history.push('/instruction')
+        }
       }
     })
   }

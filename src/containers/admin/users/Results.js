@@ -122,9 +122,9 @@ const Results = ({ className, users, history, ...rest }) => {
                     </Box>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.chineseClass}</TableCell>
-                  <TableCell>{user.hksLevel}</TableCell>
-                  <TableCell>{user.ethnic}</TableCell>
+                  <TableCell>{user.chinese_class}</TableCell>
+                  <TableCell>{user.hks_level}</TableCell>
+                  <TableCell>{user.ethnic_background}</TableCell>
                   <TableCell>{'todo'}</TableCell>
                   <TableCell>{moment(user.createdAt).format('DD/MM/YYYY')}</TableCell>
                   <TableCell align="center">

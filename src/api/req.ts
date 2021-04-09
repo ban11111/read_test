@@ -56,6 +56,13 @@ export const wrapSend = async <T>(requestFunc: requestFun, type?: string): Promi
         success: false
       }
     }
+    if (err.response.status === 400) {
+      return {
+        success: data.success,
+        info: data.info,
+        data: data
+      }
+    }
     response = {
       success: data.success,
       info: err.response.status + ' ' + err.response.statusText,
