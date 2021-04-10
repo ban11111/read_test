@@ -96,7 +96,7 @@ const Results = ({ className, users, history, ...rest }) => {
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Chinese Class</TableCell>
-                <TableCell>HKS Level</TableCell>
+                <TableCell>HSK Level</TableCell>
                 <TableCell>Ethnic Background</TableCell>
                 <TableCell>Exam Result</TableCell>
                 <TableCell>RegisteredAt</TableCell>
