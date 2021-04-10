@@ -137,7 +137,7 @@ export default function InfoPage(props: any) {
             <Grid item xs={12}>
               <TextField
                 error={emailInvalid}
-                helperText="Invalid Email Address"
+                helperText={emailInvalid ? 'Invalid Email Address' : null}
                 variant="outlined"
                 required
                 fullWidth

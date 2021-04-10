@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, createRef } from 'react'
 import './index.css'
 import api from '../../api'
 import Recorder from 'recorder-core'
@@ -8,11 +8,25 @@ import 'recorder-core/src/extensions/waveview'
 import { styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
 import { blue, green, red } from '@material-ui/core/colors'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
-import { Button, Container, Grid, Paper, MobileStepper, TextField, IconButton } from '@material-ui/core'
-import { KeyboardArrowLeft, KeyboardArrowRight, Mic, MicNone } from '@material-ui/icons'
+import Button from '@material-ui/core/Button'
+import Container from '@material-ui/core/Container'
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
+import MobileStepper from '@material-ui/core/MobileStepper'
+import TextField from '@material-ui/core/TextField'
+import IconButton from '@material-ui/core/IconButton'
+import Snackbar from '@material-ui/core/Snackbar'
+import Backdrop from '@material-ui/core/Backdrop'
+import CircularProgress from '@material-ui/core/CircularProgress'
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
+import Mic from '@material-ui/icons/Mic'
+import MicNone from '@material-ui/icons/MicNone'
+import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { KeyUserInfo, storageGet } from '../../global/storage'
 import { toast } from 'react-toastify'
 import moment from 'moment'
+import Alert from '@material-ui/lab/Alert'
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -57,17 +71,15 @@ export default class Index extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      rec: null,
-      begin: false,
-      status: 'init',
-      audioBlob: null,
-      src: '',
-      input: '',
+      begin: false, // 测试开始标识， 在获取BasicInfo后置为true
+      status: 'init', // 录音状态
+      src: '', // 用于在当前字词 播放音频，给用户听
+      input: '', // 当前字词的翻译
       audioConf: defaultAudioConf,
       wordIndex: 0,
-      words: [' '],
-      translation: [], // translation:["翻译"]
       reRenderTimer: false,
+      words: [' '],
+      warningPopUp: false, // 如果长按不放到时间结束， 需要弹出提醒
       paper_info: {
         paper_name: '',
         paper_version: '',
@@ -75,7 +87,11 @@ export default class Index extends Component {
         interval: 10 // 秒
       }
     }
-    this.translationRef = React.createRef()
+    this.recorded = false // 用户标识当前字有没有录音过， 如果没有， 就不用了interval等待blob了
+    this.audioBlob = null // 因为音频生成有一定延时， 需要用interval轮询， 避免在低配机器上发生漏传
+    // this.crossPressing = false // 边界情况， 如果长按不放到下一题， 需要额外处理
+    this.translationRef = createRef()
+    this.audioPlayRef = createRef()
     this.rec = Recorder({
       type: 'mp3',
       bitRate: defaultAudioConf.bitRate,
@@ -97,6 +113,16 @@ export default class Index extends Component {
       if (!res.success) {
         toast.error(res.info)
       } else {
+        // eslint-disable-next-line no-control-regex
+        const words = res.data.current_paper.words.split(RegExp('[ \t\n]+'))
+        if (res.data.progress_index >= words.length - 1) {
+          toast.info(
+            "you've already finished current test, please wait util the next test released, " +
+              "if there's any issue, please contact your teacher"
+          )
+          this.props.history.push('/finish')
+          return
+        }
         this.setState(
           {
             audioConf: {
@@ -104,8 +130,7 @@ export default class Index extends Component {
               sampleRate: res.data.global_setting['SampleRate'] // hz
             },
             wordIndex: res.data.progress_index + 1,
-            // eslint-disable-next-line no-control-regex
-            words: res.data.current_paper.words.split(RegExp('[ \t\n]+')),
+            words: words,
             paper_info: {
               paper_name: res.data.current_paper.name,
               paper_version: res.data.current_paper.version,
@@ -116,7 +141,6 @@ export default class Index extends Component {
           },
           () => {
             this.wave = Recorder.WaveView({ elem: '.wave-box' })
-            console.log('progress?????', res.data.progress_index + 1, this.state.wordIndex)
           }
         )
         this.beginTime = moment() // 用于计算每道题耗时
@@ -159,7 +183,7 @@ export default class Index extends Component {
     formData.append('duration', duration)
     api.uploadAudio(formData).then(resp => {
       if (!resp.success) {
-        toast.error(resp.info + ' -- if you cant go to next word, try refresh the page')
+        toast.error(resp.info + " -- if you can't go to next word, try refresh the page")
       } else {
         next()
       }
@@ -178,19 +202,33 @@ export default class Index extends Component {
     })
     this.rec.open(
       () => {
-        clearTimeout(this.timeoutFn)
         this.rec.start()
         const set = this.rec.set
         console.log('录制中：' + set.type + ' ' + set.sampleRate + 'hz ' + set.bitRate + 'kbps')
       },
       (msg, isUserNotAllow) => {
-        clearTimeout(this.timeoutFn)
         console.log((isUserNotAllow ? 'UserNotAllow，' : '') + '无法录音:' + msg, 1)
       }
     )
   }
 
+  recStop() {
+    this.rec.stop(
+      (blob, duration) => {
+        this.rec.close() // 释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时手机端播放音频有杂音
+        console.log('audio duration: ', duration)
+        this.audioBlob = blob
+        this.setState({ src: window.URL.createObjectURL(blob) })
+      },
+      msg => {
+        console.log('录音失败:' + msg, 1)
+        this.rec.close() //可以通过stop方法的第3个参数来自动调用close
+      }
+    )
+  }
+
   mouseDown = () => {
+    this.recorded = true
     this.setState({ status: 'recording' })
     this.recStart()
     document.onmouseup = this.touchUp
@@ -205,50 +243,60 @@ export default class Index extends Component {
   }
 
   touchDown = () => {
+    this.recorded = true
     this.setState({ status: 'recording' })
     this.recStart()
   }
 
-  recStop() {
-    this.rec.stop(
-      (blob, duration) => {
-        this.rec.close() // 释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时手机端播放音频有杂音
-        console.log('audio duration: ', duration)
-        this.setState({ audioBlob: blob, src: window.URL.createObjectURL(blob) })
-      },
-      msg => {
-        console.log('录音失败:' + msg, 1)
-        this.rec.close() //可以通过stop方法的第3个参数来自动调用close
-      }
-    )
-  }
-
   playAndStop = () => {
-    this.refs.audioControl.play()
+    this.audioPlayRef.current.play()
   }
 
-  onNext = duration => () => {
-    this.uploadFile(this.state.audioBlob, duration, () => {
-      window.URL.revokeObjectURL(this.state.src) // 清除 dataUrl
-      if (this.state.wordIndex >= this.state.words.length - 1) {
-        this.props.history.push('/finish')
+  timesUpTouchUp = duration => () => {
+    this.setState({ status: 'stopped', warningPopUp: false }, () => {
+      document.onmouseup = null
+    })
+    this.uploadLoop(duration)
+  }
+
+  onNext = (duration, timesUp) => () => {
+    if (timesUp && this.state.status === 'recording') {
+      document.onmouseup = this.timesUpTouchUp(duration)
+      this.setState({ warningPopUp: true })
+      this.recStop()
+    } else {
+      this.uploadLoop(duration)
+    }
+  }
+
+  uploadLoop = duration => {
+    const iv = setInterval(() => {
+      if (this.recorded && !this.audioBlob) {
         return
       }
-      this.setState(
-        {
-          wordIndex: this.state.wordIndex + 1,
-          reRenderTimer: true,
-          translation: this.state.translation.concat(this.state.input),
-          blob: null,
-          src: '',
-          input: ''
-        },
-        () => {
-          this.beginTime = moment() // 用于计算每道题耗时
-          this.setState({ reRenderTimer: false })
+      clearInterval(iv)
+      this.recorded = false
+      this.uploadFile(this.audioBlob, duration, () => {
+        window.URL.revokeObjectURL(this.state.src) // 清除 dataUrl
+        if (this.state.wordIndex >= this.state.words.length - 1) {
+          this.props.history.push('/finish')
+          return
         }
-      )
-    })
+        this.audioBlob = null
+        this.setState(
+          {
+            wordIndex: this.state.wordIndex + 1,
+            reRenderTimer: true,
+            src: '',
+            input: ''
+          },
+          () => {
+            this.beginTime = moment() // 用于计算每道题耗时
+            this.setState({ reRenderTimer: false })
+          }
+        )
+      })
+    }, 250)
   }
 
   onClickBack = () => {
@@ -279,7 +327,7 @@ export default class Index extends Component {
         ]}
         onComplete={totalElapsedTime => {
           console.log(totalElapsedTime, wordIndex, 'on complete')
-          this.onNext(this.state.paper_info.interval * 1000)()
+          this.onNext(this.state.paper_info.interval * 1000, true)()
         }}
       >
         {({ remainingTime }) => {
@@ -289,15 +337,31 @@ export default class Index extends Component {
     )
   }
 
+  renderWarningPopUp = () => {
+    return (
+      <Snackbar open={this.state.warningPopUp} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert severity="warning">Sorry, time's up! Release button to enter the next word...</Alert>
+      </Snackbar>
+    )
+  }
+
   render() {
     const { begin, status, src, words, wordIndex, reRenderTimer } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
     if (!begin) {
-      return this.renderVisualization()
+      return (
+        <>
+          {this.renderVisualization()}
+          <Backdrop open>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        </>
+      )
     }
     return (
       <Container maxWidth="sm" className="demo-page">
+        {this.renderWarningPopUp()}
         <Grid container spacing={2} alignItems={'center'}>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             {!reRenderTimer && this.renderCountDown(wordIndex)}
@@ -327,25 +391,24 @@ export default class Index extends Component {
             {this.renderVisualization()}
           </Grid>
           <Grid item xs={2}>
-            <Button color="secondary" variant="contained" onClick={this.playAndStop} style={{ float: 'right' }}>
-              Play
-            </Button>
+            <IconButton color="primary" variant="outlined" onClick={this.playAndStop} style={{ float: 'right' }}>
+              <PlayCircleOutlineIcon style={{ fontSize: 50 }} />
+            </IconButton>
           </Grid>
-          <audio ref="audioControl" src={src} />
+          <audio ref={this.audioPlayRef} src={src} />
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             <IconButton
               className="nocopy"
-              variant="extended"
               onMouseDown={this.mouseDown}
               onTouchStart={this.touchDown}
               onTouchEnd={this.touchUp}
               onContextMenu={e => {
                 e.preventDefault()
               }}
-              size="medium"
+              size="small"
               color={recording ? 'default' : 'primary'}
             >
-              {recording ? <Mic /> : <MicNone />}
+              {recording ? <Mic style={{ fontSize: 45 }} /> : <MicNone style={{ fontSize: 45 }} />}
             </IconButton>
           </Grid>
 
