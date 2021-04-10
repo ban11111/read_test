@@ -1,5 +1,7 @@
 import React from 'react'
 
+const p = { style: { margin: 8 } }
+
 export const columns = [
   {
     title: 'Word',
@@ -29,7 +31,7 @@ export const columns = [
     dataIndex: 'audio_url',
     key: 'audio_url',
     render: url => {
-      return <>todo: {url}</>
+      return <audio controls src={'/file/' + url} {...p} />
     }
   }
 ]

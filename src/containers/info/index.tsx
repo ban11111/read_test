@@ -171,7 +171,7 @@ export default function InfoPage(props: any) {
                     required
                     fullWidth
                     id="hksLevel"
-                    label="HKS Level"
+                    label="HSK Level"
                     name="hksLevel"
                     onChange={onEdit('hks_level')}
                   >
@@ -184,7 +184,7 @@ export default function InfoPage(props: any) {
                     required
                     fullWidth
                     id="ethnicBackground"
-                    label="Ethnic Background"
+                    label=" Ethnic Background (Kinh/Hoa/...)"
                     name="ethnicBackground"
                     onChange={onEdit('ethnic_background')}
                   >
@@ -204,19 +204,19 @@ export default function InfoPage(props: any) {
           >
             {needSignUp ? 'sign up' : 'sign in'}
           </Button>
-          <Grid container justify="flex-end">
-            <Grid item>
-              <Link
-                href="/instruction"
-                variant="body2"
-                onClick={() => {
-                  storageSet(KeyUserInfo, userInfo)
-                }}
-              >
-                临时转到instruction页面
-              </Link>
-            </Grid>
-          </Grid>
+          {/*<Grid container justify="flex-end">*/}
+          {/*  <Grid item>*/}
+          {/*    <Link*/}
+          {/*      href="/instruction"*/}
+          {/*      variant="body2"*/}
+          {/*      onClick={() => {*/}
+          {/*        storageSet(KeyUserInfo, userInfo)*/}
+          {/*      }}*/}
+          {/*    >*/}
+          {/*      临时转到instruction页面*/}
+          {/*    </Link>*/}
+          {/*  </Grid>*/}
+          {/*</Grid>*/}
         </Box>
       </div>
       <Box mt={5}>

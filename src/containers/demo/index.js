@@ -93,24 +93,32 @@ export default class Index extends Component {
   }
 
   getBasicInfo = () => {
-    api.getBasicInfo(null).then(res => {
+    api.getBasicInfo({ uid: this.userInfo.id }).then(res => {
       if (!res.success) {
         toast.error(res.info)
       } else {
-        this.setState({
-          audioConf: {
-            bitRate: res.data.global_setting['BitRate'], // kbps
-            sampleRate: res.data.global_setting['SampleRate'] // hz
+        this.setState(
+          {
+            audioConf: {
+              bitRate: res.data.global_setting['BitRate'], // kbps
+              sampleRate: res.data.global_setting['SampleRate'] // hz
+            },
+            wordIndex: res.data.progress_index + 1,
+            // eslint-disable-next-line no-control-regex
+            words: res.data.current_paper.words.split(RegExp('[ \t\n]+')),
+            paper_info: {
+              paper_name: res.data.current_paper.name,
+              paper_version: res.data.current_paper.version,
+              paper_id: res.data.current_paper.id,
+              interval: res.data.current_paper.interval
+            },
+            begin: true
           },
-          words: res.data.current_paper.words.split(RegExp('[ \t\n]+')),
-          paper_info: {
-            paper_name: res.data.current_paper.name,
-            paper_version: res.data.current_paper.version,
-            paper_id: res.data.current_paper.id,
-            interval: res.data.current_paper.interval
-          },
-          begin: true
-        })
+          () => {
+            this.wave = Recorder.WaveView({ elem: '.wave-box' })
+            console.log('progress?????', res.data.progress_index + 1, this.state.wordIndex)
+          }
+        )
         this.beginTime = moment() // 用于计算每道题耗时
       }
     })
@@ -257,7 +265,7 @@ export default class Index extends Component {
   }
 
   renderCountDown = wordIndex => {
-    return <></>
+    // return <></>
     return (
       <CountdownCircleTimer
         isPlaying={true}
@@ -286,7 +294,7 @@ export default class Index extends Component {
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
     if (!begin) {
-      return <>{this.renderVisualization()}</>
+      return this.renderVisualization()
     }
     return (
       <Container maxWidth="sm" className="demo-page">

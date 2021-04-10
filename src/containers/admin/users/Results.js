@@ -125,7 +125,7 @@ const Results = ({ className, users, history, ...rest }) => {
                   <TableCell>{user.chinese_class}</TableCell>
                   <TableCell>{user.hks_level}</TableCell>
                   <TableCell>{user.ethnic_background}</TableCell>
-                  <TableCell>{'todo'}</TableCell>
+                  <TableCell>{'这里展示做过哪些试卷？'}</TableCell>
                   <TableCell>{moment(user.createdAt).format('DD/MM/YYYY')}</TableCell>
                   <TableCell align="center">
                     <ButtonGroup size="small">
