@@ -126,7 +126,7 @@ const Results = ({ className, users, history, ...rest }) => {
                   <TableCell>{user.hks_level}</TableCell>
                   <TableCell>{user.ethnic_background}</TableCell>
                   <TableCell>{'这里展示做过哪些试卷？'}</TableCell>
-                  <TableCell>{moment(user.createdAt).format('DD/MM/YYYY')}</TableCell>
+                  <TableCell>{moment(user.createdAt).format('YYYY-MM-DD hh:mm:ss')}</TableCell>
                   <TableCell align="center">
                     <ButtonGroup size="small">
                       <Button color="primary" onClick={handleReview} value={user.id}>

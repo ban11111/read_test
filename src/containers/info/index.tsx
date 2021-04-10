@@ -13,6 +13,7 @@ import Container from '@material-ui/core/Container'
 import api from 'api'
 import { toast } from 'react-toastify'
 import { KeyUserInfo, storageSet } from 'global/storage'
+import { IsValidEmail } from 'utils/emailCheck'
 
 // 本页面逻辑, 先登录(只用填email), 如果账户不存在则展示注册逻辑
 
@@ -52,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface UserInfo {
-  email: string // 先简单粗暴, 直接用email当做唯一识别字段
+  email: string
   name: string
   chinese_class: string
   hks_level: string
@@ -70,18 +71,26 @@ export default function InfoPage(props: any) {
     hks_level: '',
     ethnic_background: ''
   })
+  const [emailInvalid, setEmailInvalid] = useState(false)
   const [needSignUp, setNeedSignUp] = useState(false)
 
   const onEdit = (l: label) => (e: ChangeEvent<HTMLInputElement>) => {
     const newUserInfo: UserInfo = userInfo
     newUserInfo[l] = e.currentTarget.value
     setUserInfo(newUserInfo)
+    if (l === 'email') {
+      setEmailInvalid(!IsValidEmail(e.currentTarget.value))
+    }
   }
 
   const signUp = () => {
+    if (emailInvalid) {
+      toast.error('incorrect email address')
+      return
+    }
     api.signUp(userInfo).then(resp => {
       if (!resp.success) {
-        toast.error('🚀' + resp.info)
+        toast.error('🚀 ' + resp.info)
       } else {
         storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
         props.history.push('/instruction')
@@ -90,10 +99,14 @@ export default function InfoPage(props: any) {
   }
 
   const signIn = () => {
+    if (emailInvalid) {
+      toast.error('incorrect email address')
+      return
+    }
     api.signIn({ email: userInfo.email }).then(resp => {
       if (!resp.success) {
         // 根据返回值判断, 如果是用户不存在, 则转为注册页面
-        toast.error('🚀' + resp.info)
+        toast.error('🚀 ' + resp.info)
       } else {
         if (resp.data.user_not_exist) {
           setNeedSignUp(true)
@@ -123,6 +136,8 @@ export default function InfoPage(props: any) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
+                error={emailInvalid}
+                helperText="Invalid Email Address"
                 variant="outlined"
                 required
                 fullWidth

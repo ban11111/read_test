@@ -7,13 +7,13 @@ export const columns = [
     title: 'Word',
     dataIndex: 'word',
     key: 'word',
-    render: text => <a>{text}</a>
+    render: text => <span>{text}</span>
   },
   {
     title: 'Audio',
     dataIndex: 'audio_url',
     key: 'audio_url',
-    render: url => <a>{url ? 'yes' : 'no'}</a>
+    render: url => <span>{url ? 'yes' : 'no'}</span>
   },
   {
     title: 'Translation',
