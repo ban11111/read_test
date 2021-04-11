@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, KeyboardEvent, useState } from 'react'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -64,6 +64,12 @@ const Login = (props: any) => {
     })
   }
 
+  const onPressEnter = (e: KeyboardEvent) => {
+    if (e.keyCode === 13) {
+      login()
+    }
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -100,6 +106,7 @@ const Login = (props: any) => {
                 name="password"
                 autoComplete="password"
                 onChange={onEdit('password')}
+                onKeyDown={onPressEnter}
               >
                 {loginInfo.username}
               </TextField>

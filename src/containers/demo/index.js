@@ -235,11 +235,16 @@ export default class Index extends Component {
   }
 
   touchUp = () => {
-    this.setState({ status: 'stopped' }, () => {
+    this.recStop()
+    // 说明长按且超时了
+    if (this.state.warningPopUp) {
+      this.uploadLoop(this.state.paper_info.interval * 1000)
+    } else {
+      this.translationRef.current.lastChild.firstChild.focus()
+    }
+    this.setState({ status: 'stopped', warningPopUp: false }, () => {
       document.onmouseup = null
     })
-    this.recStop()
-    this.translationRef.current.lastChild.firstChild.focus()
   }
 
   touchDown = () => {
@@ -253,10 +258,10 @@ export default class Index extends Component {
   }
 
   timesUpTouchUp = duration => () => {
+    this.uploadLoop(duration)
     this.setState({ status: 'stopped', warningPopUp: false }, () => {
       document.onmouseup = null
     })
-    this.uploadLoop(duration)
   }
 
   onNext = (duration, timesUp) => () => {
