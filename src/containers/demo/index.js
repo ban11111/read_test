@@ -233,7 +233,6 @@ export default class Index extends Component {
   }
 
   mouseDown = () => {
-    console.log('???mouseDown???')
     this.recorded = true
     this.setState({ status: 'recording' })
     this.recStart()
@@ -274,13 +273,13 @@ export default class Index extends Component {
   }
 
   timesUpTouchUp = duration => () => {
+    document.onmouseup = null
     this.uploadLoop(duration)
-    this.setState({ status: 'stopped', warningPopUp: false }, () => {
-      document.onmouseup = null
-    })
+    this.setState({ status: 'stopped', warningPopUp: false })
   }
 
-  onNext = (duration, timesUp) => () => {
+  onNext = timesUp => () => {
+    const duration = timesUp ? this.state.paper_info.interval * 1000 : moment().diff(this.beginTime, 'milliseconds')
     if (timesUp && this.state.status === 'recording') {
       document.onmouseup = this.timesUpTouchUp(duration)
       this.setState({ warningPopUp: true })
@@ -347,7 +346,7 @@ export default class Index extends Component {
         ]}
         onComplete={totalElapsedTime => {
           console.log(totalElapsedTime, wordIndex, 'on complete')
-          this.onNext(this.state.paper_info.interval * 1000, true)()
+          this.onNext(true)()
         }}
       >
         {({ remainingTime }) => {
@@ -369,7 +368,6 @@ export default class Index extends Component {
     const { begin, status, src, words, wordIndex, reRenderTimer } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
-    console.log('???isMobile???', isMobile)
 
     return (
       <Container maxWidth="sm" className="demo-page">
@@ -378,6 +376,10 @@ export default class Index extends Component {
         </Backdrop>
         {this.renderWarningPopUp()}
         <Grid container spacing={2} alignItems={'center'}>
+          <Grid item xs={12}>
+            <span style={{ color: 'red' }}>DEBUG: Is current device mobile: </span>
+            <span style={{ color: 'red', fontSize: 'large' }}>{isMobile ? 'yes' : 'no'}</span>
+          </Grid>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             {!reRenderTimer && this.renderCountDown(wordIndex)}
           </Grid>
@@ -589,19 +591,18 @@ export default class Index extends Component {
             {/*MuiContainer-maxWidthSm 复用container的CSS， @media 以及 maxWidth：600px*/}
             <Box position="absolute" bottom={0} className="MuiContainer-maxWidthSm" width="100%">
               <Progress
-                style={{ width: 'cal()', flexGrow: 1 }}
                 variant="progress"
                 steps={words.length}
                 position="static"
                 activeStep={wordIndex}
                 nextButton={
-                  <Button size="small" onClick={this.onNext(moment().diff(this.beginTime, 'milliseconds'))}>
+                  <Button size="small" onClick={this.onNext()}>
                     {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
                     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                   </Button>
                 }
                 backButton={
-                  <Button size="small" onClick={this.onClickBack} disabled={wordIndex === 0}>
+                  <Button size="small" onClick={this.onClickBack} disabled>
                     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
                     Back
                   </Button>
