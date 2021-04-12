@@ -20,13 +20,15 @@ import Backdrop from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
-import Mic from '@material-ui/icons/Mic'
 import MicNone from '@material-ui/icons/MicNone'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { KeyUserInfo, storageGet } from '../../global/storage'
 import { toast } from 'react-toastify'
 import moment from 'moment'
 import Alert from '@material-ui/lab/Alert'
+import { disableBodyScroll } from 'body-scroll-lock'
+import Box from '@material-ui/core/Box'
+import { isMobile } from 'react-device-detect'
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -89,9 +91,9 @@ export default class Index extends Component {
     }
     this.recorded = false // 用户标识当前字有没有录音过， 如果没有， 就不用了interval等待blob了
     this.audioBlob = null // 因为音频生成有一定延时， 需要用interval轮询， 避免在低配机器上发生漏传
-    // this.crossPressing = false // 边界情况， 如果长按不放到下一题， 需要额外处理
     this.translationRef = createRef()
     this.audioPlayRef = createRef()
+    this.recordButtonRef = createRef()
     this.rec = Recorder({
       type: 'mp3',
       bitRate: defaultAudioConf.bitRate,
@@ -137,9 +139,12 @@ export default class Index extends Component {
               paper_id: res.data.current_paper.id,
               interval: res.data.current_paper.interval
             },
-            begin: true
+            begin: true,
+            reRenderTimer: true
           },
           () => {
+            this.setState({ reRenderTimer: false })
+            disableBodyScroll(this.recordButtonRef.current)
             this.wave = Recorder.WaveView({ elem: '.wave-box' })
           }
         )
@@ -228,10 +233,23 @@ export default class Index extends Component {
   }
 
   mouseDown = () => {
+    console.log('???mouseDown???')
     this.recorded = true
     this.setState({ status: 'recording' })
     this.recStart()
-    document.onmouseup = this.touchUp
+    document.onmouseup = this.mouseUp
+  }
+
+  mouseUp = () => {
+    document.onmouseup = null
+    this.recStop()
+    // 说明长按且超时了
+    if (this.state.warningPopUp) {
+      this.uploadLoop(this.state.paper_info.interval * 1000)
+    } else {
+      this.translationRef.current.lastChild.firstChild.focus()
+    }
+    this.setState({ status: 'stopped', warningPopUp: false })
   }
 
   touchUp = () => {
@@ -242,9 +260,7 @@ export default class Index extends Component {
     } else {
       this.translationRef.current.lastChild.firstChild.focus()
     }
-    this.setState({ status: 'stopped', warningPopUp: false }, () => {
-      document.onmouseup = null
-    })
+    this.setState({ status: 'stopped', warningPopUp: false })
   }
 
   touchDown = () => {
@@ -318,7 +334,6 @@ export default class Index extends Component {
   }
 
   renderCountDown = wordIndex => {
-    // return <></>
     return (
       <CountdownCircleTimer
         isPlaying={true}
@@ -354,18 +369,13 @@ export default class Index extends Component {
     const { begin, status, src, words, wordIndex, reRenderTimer } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
-    if (!begin) {
-      return (
-        <>
-          {this.renderVisualization()}
-          <Backdrop open>
-            <CircularProgress color="inherit" />
-          </Backdrop>
-        </>
-      )
-    }
+    console.log('???isMobile???', isMobile)
+
     return (
       <Container maxWidth="sm" className="demo-page">
+        <Backdrop open={!begin} style={{ zIndex: 1201 }}>
+          <CircularProgress color="inherit" size={150} thickness={2} />
+        </Backdrop>
         {this.renderWarningPopUp()}
         <Grid container spacing={2} alignItems={'center'}>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
@@ -376,22 +386,6 @@ export default class Index extends Component {
               <Word>{currentWord}</Word>
             </div>
           </Grid>
-          {/*<Grid item xs={2}>*/}
-          {/*  <Fab*/}
-          {/*    className="nocopy"*/}
-          {/*    variant="extended"*/}
-          {/*    onMouseDown={this.mouseDown}*/}
-          {/*    onTouchStart={this.touchDown}*/}
-          {/*    onTouchEnd={this.touchUp}*/}
-          {/*    onContextMenu={e => {*/}
-          {/*      e.preventDefault()*/}
-          {/*    }}*/}
-          {/*    size="medium"*/}
-          {/*    color={recording ? 'default' : 'primary'}*/}
-          {/*  >*/}
-          {/*    {recording ? 'Hold' : 'Hold'}*/}
-          {/*  </Fab>*/}
-          {/*</Grid>*/}
           <Grid item xs={10}>
             {this.renderVisualization()}
           </Grid>
@@ -401,22 +395,6 @@ export default class Index extends Component {
             </IconButton>
           </Grid>
           <audio ref={this.audioPlayRef} src={src} />
-          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-            <IconButton
-              className="nocopy"
-              onMouseDown={this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              size="small"
-              color={recording ? 'default' : 'primary'}
-            >
-              {recording ? <Mic style={{ fontSize: 45 }} /> : <MicNone style={{ fontSize: 45 }} />}
-            </IconButton>
-          </Grid>
-
           <Grid item xs={12}>
             <ValidationTextField
               ref={this.translationRef}
@@ -432,25 +410,204 @@ export default class Index extends Component {
               }}
             />
           </Grid>
-          <Grid item xs={12}>
-            <Progress
-              variant="progress"
-              steps={words.length}
-              position="static"
-              activeStep={wordIndex}
-              nextButton={
-                <Button size="small" onClick={this.onNext(moment().diff(this.beginTime, 'milliseconds'))}>
-                  {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
-                  {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-                </Button>
-              }
-              backButton={
-                <Button size="small" onClick={this.onClickBack} disabled={wordIndex === 0}>
-                  {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                  Back
-                </Button>
-              }
-            />
+          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'dotted' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'thin solid' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'thick solid' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'solid' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'groove' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'inset' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'outset' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ border: 'ridge' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+          </Grid>
+          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+            <IconButton
+              variant="round"
+              ref={this.recordButtonRef}
+              className="nocopy"
+              onMouseDown={isMobile ? undefined : this.mouseDown}
+              onTouchStart={this.touchDown}
+              onTouchEnd={this.touchUp}
+              onContextMenu={e => {
+                e.preventDefault()
+              }}
+              onMouseMove={e => {
+                e.preventDefault()
+              }}
+              size="medium"
+              color={recording ? 'default' : 'primary'}
+              style={{ position: 'absolute', bottom: 50, border: 'thin solid' }}
+            >
+              <MicNone style={{ fontSize: 80 }} />
+            </IconButton>
+          </Grid>
+          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+            {/*MuiContainer-maxWidthSm 复用container的CSS， @media 以及 maxWidth：600px*/}
+            <Box position="absolute" bottom={0} className="MuiContainer-maxWidthSm" width="100%">
+              <Progress
+                style={{ width: 'cal()', flexGrow: 1 }}
+                variant="progress"
+                steps={words.length}
+                position="static"
+                activeStep={wordIndex}
+                nextButton={
+                  <Button size="small" onClick={this.onNext(moment().diff(this.beginTime, 'milliseconds'))}>
+                    {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
+                    {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                  </Button>
+                }
+                backButton={
+                  <Button size="small" onClick={this.onClickBack} disabled={wordIndex === 0}>
+                    {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                    Back
+                  </Button>
+                }
+              />
+            </Box>
           </Grid>
         </Grid>
       </Container>
