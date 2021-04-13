@@ -319,15 +319,6 @@ export default class Index extends Component {
     }, 250)
   }
 
-  onClickBack = () => {
-    // if (this.state.wordIndex <= 0) {
-    //   return
-    // }
-    // this.setState({ wordIndex: this.state.wordIndex - 1, reRenderTimer: true }, () => {
-    //   this.setState({ reRenderTimer: false })
-    // })
-  }
-
   updateAudioConf = (sampleRate, bitRate) => {
     this.setState({ audioConf: { sampleRate: sampleRate, bitRate: bitRate } })
   }
@@ -428,161 +419,7 @@ export default class Index extends Component {
               }}
               size="medium"
               color={recording ? 'default' : 'primary'}
-              style={{ border: 'dotted' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'thin solid' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'thick solid' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'solid' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'groove' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'inset' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'outset' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ border: 'ridge' }}
-            >
-              <MicNone style={{ fontSize: 80 }} />
-            </IconButton>
-          </Grid>
-          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-            <IconButton
-              variant="round"
-              ref={this.recordButtonRef}
-              className="nocopy"
-              onMouseDown={isMobile ? undefined : this.mouseDown}
-              onTouchStart={this.touchDown}
-              onTouchEnd={this.touchUp}
-              onContextMenu={e => {
-                e.preventDefault()
-              }}
-              onMouseMove={e => {
-                e.preventDefault()
-              }}
-              size="medium"
-              color={recording ? 'default' : 'primary'}
-              style={{ position: 'absolute', bottom: 50, border: 'thin solid' }}
+              style={{ position: 'absolute', bottom: 50, border: 'thick solid' }}
             >
               <MicNone style={{ fontSize: 80 }} />
             </IconButton>
@@ -601,12 +438,12 @@ export default class Index extends Component {
                     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                   </Button>
                 }
-                backButton={
-                  <Button size="small" onClick={this.onClickBack} disabled>
-                    {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                    Back
-                  </Button>
-                }
+                // backButton={
+                //   <Button size="small" onClick={this.onClickBack} disabled>
+                //     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                //     Back
+                //   </Button>
+                // }
               />
             </Box>
           </Grid>

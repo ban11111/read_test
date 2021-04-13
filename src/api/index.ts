@@ -64,8 +64,16 @@ export class Api {
     return this.post(`/api/v1/admin/query_users`)
   }
 
+  deleteUser = (payload: any) => {
+    return this.post(`/api/v1/admin/delete_user`, payload)
+  }
+
   QueryAnswers = (payload: any) => {
     return this.post(`/api/v1/admin/query_answers`, payload)
+  }
+
+  deleteAnswers = (payload: any) => {
+    return this.post(`/api/v1/admin/clear_answers`, payload)
   }
 
   querySettings = () => {
