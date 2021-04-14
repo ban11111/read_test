@@ -122,7 +122,6 @@ const Results = ({ className, users, reload, history, ...rest }) => {
   }
 
   const onSearchUser = e => {
-    console.log('??????????', e.current)
     setFilterUserName(e.currentTarget.value)
   }
 
