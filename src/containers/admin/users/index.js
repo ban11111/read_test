@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Box, Container, makeStyles } from '@material-ui/core'
 import Page from 'components/Page'
 import Results from './Results'
-import Toolbar from './Toolbar'
 import api from '../../../api'
 import { toast } from 'react-toastify'
 
@@ -36,10 +35,9 @@ const Users = props => {
   return (
     <Page className={classes.root} title="Customers">
       <Container maxWidth={false}>
-        <Toolbar />
         <Box mt={3} style={{ minWidth: 1099 }}>
           {/*// todo dont use another page, use sub component */}
-          <Results users={users} history={props.history} />
+          <Results users={users} reload={getUsers} history={props.history} />
         </Box>
       </Container>
     </Page>

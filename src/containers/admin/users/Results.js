@@ -2,155 +2,202 @@ import React, { useState } from 'react'
 import clsx from 'clsx'
 import PropTypes from 'prop-types'
 import moment from 'moment'
-import PerfectScrollbar from 'react-perfect-scrollbar'
-import {
-  Avatar,
-  Box,
-  Card,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-  makeStyles,
-  ButtonGroup,
-  Button
-} from '@material-ui/core'
+import Avatar from '@material-ui/core/Avatar'
+import Box from '@material-ui/core/Box'
+import Card from '@material-ui/core/Card'
+import Typography from '@material-ui/core/Typography'
+import { makeStyles } from '@material-ui/core/styles'
+import ButtonGroup from '@material-ui/core/ButtonGroup'
+import Button from '@material-ui/core/Button'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogActions from '@material-ui/core/DialogActions'
+import Dialog from '@material-ui/core/Dialog'
 import getInitials from 'utils/getInitials'
+import { Table } from 'antd'
+import api from 'api'
+import { toast } from 'react-toastify'
+import { CardContent, InputAdornment, SvgIcon, TextField } from '@material-ui/core'
+import { Search as SearchIcon } from 'react-feather'
 
 const useStyles = makeStyles(theme => ({
   root: {},
   avatar: {
     marginRight: theme.spacing(2)
+  },
+  toolBar: {
+    marginBottom: theme.spacing(2)
   }
 }))
 
-const Results = ({ className, users, history, ...rest }) => {
+const columns = [
+  { title: 'Name', dataIndex: 'name', render: undefined },
+  { title: 'Email', dataIndex: 'email' },
+  { title: 'Chinese Class', dataIndex: 'chinese_class' },
+  { title: 'HSK Level', dataIndex: 'hks_level' },
+  { title: 'Ethnic Background', dataIndex: 'ethnic_background' },
+  {
+    title: 'Exam Result',
+    render: () => {
+      return '这里展示做过哪些试卷？'
+    }
+  },
+  {
+    title: 'RegisteredAt',
+    dataIndex: 'created_at',
+    render: time => {
+      return moment(time).format('YYYY-MM-DD hh:mm:ss')
+    }
+  },
+  { title: 'Operation', dataIndex: 'id', render: undefined }
+]
+const rowSelection = {
+  getCheckboxProps: user => ({
+    uid: user.id
+  })
+}
+
+const Results = ({ className, users, reload, history, ...rest }) => {
   const classes = useStyles()
-  const [selectedCustomerIds, setSelectedCustomerIds] = useState([])
-  const [limit, setLimit] = useState(10)
-  const [page, setPage] = useState(0)
-
-  const handleSelectAll = event => {
-    let newSelectedCustomerIds
-
-    if (event.target.checked) {
-      newSelectedCustomerIds = users.map(customer => customer.id)
-    } else {
-      newSelectedCustomerIds = []
-    }
-
-    setSelectedCustomerIds(newSelectedCustomerIds)
-  }
-
-  const handleSelectOne = (event, id) => {
-    const selectedIndex = selectedCustomerIds.indexOf(id)
-    let newSelectedCustomerIds = []
-
-    if (selectedIndex === -1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds, id)
-    } else if (selectedIndex === 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds.slice(1))
-    } else if (selectedIndex === selectedCustomerIds.length - 1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds.slice(0, -1))
-    } else if (selectedIndex > 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds.slice(0, selectedIndex),
-        selectedCustomerIds.slice(selectedIndex + 1)
-      )
-    }
-
-    setSelectedCustomerIds(newSelectedCustomerIds)
-  }
-
-  const handleLimitChange = event => {
-    setLimit(event.target.value)
-  }
-
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage)
-  }
+  const [filterUserName, setFilterUserName] = useState('')
+  const [deletePopInfo, setDeletePopInfo] = useState(0) // 只需要uid就可以了
 
   const handleReview = e => {
     history.push('/admin/users/' + e.currentTarget.value)
   }
 
-  return (
-    <Card className={clsx(classes.root, className)} {...rest}>
-      <PerfectScrollbar>
-        <Box minWidth={1050}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedCustomerIds.length === users.length}
-                    color="primary"
-                    indeterminate={selectedCustomerIds.length > 0 && selectedCustomerIds.length < users.length}
-                    onChange={handleSelectAll}
-                  />
-                </TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Chinese Class</TableCell>
-                <TableCell>HSK Level</TableCell>
-                <TableCell>Ethnic Background</TableCell>
-                <TableCell>Exam Result</TableCell>
-                <TableCell>RegisteredAt</TableCell>
-                <TableCell align="center">Operation</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.slice(0, limit).map(user => (
-                <TableRow hover key={user.id} selected={selectedCustomerIds.indexOf(user.id) !== -1}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedCustomerIds.indexOf(user.id) !== -1}
-                      onChange={event => handleSelectOne(event, user.id)}
-                      value="true"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Box alignItems="center" display="flex">
-                      <Avatar className={classes.avatar}>{getInitials(user.name)}</Avatar>
-                      <Typography color="textPrimary" variant="body1">
-                        {user.name}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.chinese_class}</TableCell>
-                  <TableCell>{user.hks_level}</TableCell>
-                  <TableCell>{user.ethnic_background}</TableCell>
-                  <TableCell>{'这里展示做过哪些试卷？'}</TableCell>
-                  <TableCell>{moment(user.createdAt).format('YYYY-MM-DD hh:mm:ss')}</TableCell>
-                  <TableCell align="center">
-                    <ButtonGroup size="small">
-                      <Button color="primary" onClick={handleReview} value={user.id}>
-                        review
-                      </Button>
-                      <Button color="secondary">delete</Button>
-                    </ButtonGroup>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+  const handleOpen = user => () => {
+    setDeletePopInfo(user)
+  }
+
+  columns[0].render = name => {
+    return (
+      <Box alignItems="center" display="flex">
+        <Avatar className={classes.avatar}>{getInitials(name)}</Avatar>
+        <Typography color="textPrimary" variant="body1">
+          {name}
+        </Typography>
+      </Box>
+    )
+  }
+  columns[7].render = uid => {
+    return (
+      <ButtonGroup size="small">
+        <Button color="primary" onClick={handleReview} value={uid}>
+          review
+        </Button>
+        <Button color="secondary" onClick={handleOpen(uid)}>
+          delete
+        </Button>
+      </ButtonGroup>
+    )
+  }
+
+  const handleClose = () => {
+    setDeletePopInfo(0)
+  }
+
+  const deleteUser = () => {
+    api.deleteUser({ uid: deletePopInfo }).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        toast.warning('😢 you actually deleted somebody!')
+        reload()
+        handleClose()
+      }
+    })
+  }
+
+  const deleteAnswers = () => {
+    api.deleteAnswers({ uid: deletePopInfo }).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        toast.warning("😢 you actually deleted somebody's progress!")
+        handleClose()
+      }
+    })
+  }
+
+  const onSearchUser = e => {
+    setFilterUserName(e.currentTarget.value)
+  }
+
+  const toolBar = () => {
+    return (
+      <div className={classes.toolBar}>
+        <Box display="flex" justifyContent="flex-end">
+          <Button color="primary" variant="contained">
+            Export Data
+          </Button>
         </Box>
-      </PerfectScrollbar>
-      <TablePagination
-        component="div"
-        count={users.length}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleLimitChange}
-        page={page}
-        rowsPerPage={limit}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
-    </Card>
+        <Box mt={3}>
+          <Card>
+            <CardContent>
+              <Box maxWidth={500}>
+                <TextField
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SvgIcon fontSize="small" color="action">
+                          <SearchIcon />
+                        </SvgIcon>
+                      </InputAdornment>
+                    )
+                  }}
+                  placeholder="Search user"
+                  variant="outlined"
+                  value={filterUserName}
+                  onChange={onSearchUser}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {toolBar()}
+      <Card className={clsx(classes.root, className)} {...rest}>
+        <Box minWidth={1050}>
+          <Table
+            rowSelection={{
+              type: 'checkbox',
+              ...rowSelection
+            }}
+            columns={columns}
+            dataSource={users.filter(value => {
+              return value.name.search(filterUserName) !== -1
+            })}
+          />
+          <Dialog open={!!deletePopInfo} onClose={handleClose}>
+            <DialogTitle>Are you sure to delete?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>it's a dangerous move!</DialogContentText>
+              <DialogContentText>If you delete an User, then all of he's progress is wiped off too!</DialogContentText>
+              <DialogContentText>DeleteAnswers will only clear the user's progress...</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={deleteAnswers} color="secondary">
+                Delete Answers
+              </Button>
+              <Button onClick={deleteUser} color="secondary">
+                Delete User
+              </Button>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+      </Card>
+    </>
   )
 }
 

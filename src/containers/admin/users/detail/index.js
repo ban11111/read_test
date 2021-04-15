@@ -5,8 +5,9 @@ import { toast } from 'react-toastify'
 import api from 'api'
 
 const Detail = props => {
+  const path = props.location.pathname.split('/')
   const req = {
-    uid: parseInt(props.location.pathname.split('/').pop()),
+    uid: parseInt(path.pop()),
     paper_id: 1 // todo
   }
 
