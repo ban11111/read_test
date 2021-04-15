@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Button, Container, makeStyles, Typography } from '@material-ui/core'
-import { data } from './data'
 import Page from 'components/Page'
 import Result from './result'
 import Editor from './editor/editor'
@@ -18,8 +17,8 @@ const useStyles = makeStyles(theme => ({
 
 const Papers = () => {
   const classes = useStyles()
-  const [papers, setPapers] = useState(data)
-  const [activePaper, setActivePaper] = useState(data[0])
+  const [papers, setPapers] = useState([])
+  const [activePaper, setActivePaper] = useState({})
   const [addNew, setAddNew] = useState(false)
 
   const getPapers = () => {

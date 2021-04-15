@@ -27,9 +27,8 @@ export const createRequest = (): ReqType => {
       Token: sessionStorage.getItem('token')
     }
   }
-  const instance = axios.create(common)
   return {
-    http: instance,
+    http: axios.create(common),
     down: axios.create({ ...common, responseType: 'blob' })
   }
 }

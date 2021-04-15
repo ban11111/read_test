@@ -1,6 +1,8 @@
 // 放所有 http 请求
 import { AxiosInstance } from 'axios'
-import { createRequest, ReqType, Response, wrapSend } from './req'
+import { createRequest, ReqType, Response, Res, wrapSend } from './req'
+
+type callbackFunc = (res: Res<any>) => void
 
 export class Api {
   request: AxiosInstance // 普通请求
@@ -13,7 +15,7 @@ export class Api {
 
   private download = async <T = any>(url = '', body: any = {}) => {
     return await wrapSend<T>(() => {
-      return this.request.post<Response>(url, body, { responseType: 'blob' })
+      return this.down.post<Response>(url, body)
     }, 'down')
   }
 
@@ -21,6 +23,15 @@ export class Api {
     return await wrapSend<T>(() => {
       return this.request.post<Response>(url, body)
     })
+  }
+
+  // 用于重新登陆的时候重置
+  refreshRequest = () => {
+    this.changeRequest(createRequest())
+  }
+  changeRequest = (req: ReqType) => {
+    this.request = req.http
+    this.down = req.down
   }
 
   // 用户注册
@@ -44,8 +55,11 @@ export class Api {
   }
 
   // =====  admin  =====
-  adminLogin = (payload: any) => {
-    return this.post(`/api/v1/admin/login`, payload)
+  adminLogin = (payload: any, callback: callbackFunc): void => {
+    this.post(`/api/v1/admin/login`, payload).then(res => {
+      callback(res)
+      this.refreshRequest()
+    })
   }
 
   queryPapers = () => {

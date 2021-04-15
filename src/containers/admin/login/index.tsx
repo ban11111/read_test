@@ -55,10 +55,12 @@ const Login = (props: any) => {
   }
 
   const login = () => {
-    api.adminLogin(loginInfo).then(res => {
+    api.adminLogin(loginInfo, res => {
       if (!res.success) {
+        sessionStorage.removeItem('token')
         toast.error('🚀' + res.info)
       } else {
+        sessionStorage.setItem('token', res.data.token)
         props.history.push('/admin/dashboard')
       }
     })
