@@ -1,11 +1,12 @@
 import React, { Component, createRef } from 'react'
+import { isMobile } from 'react-device-detect'
 import './index.css'
 import api from '../../api'
 import Recorder from 'recorder-core'
 import 'recorder-core/src/engine/mp3'
 import 'recorder-core/src/engine/mp3-engine'
 import 'recorder-core/src/extensions/waveview'
-import { styled, ThemeProvider, withStyles } from '@material-ui/core/styles'
+import { styled, withStyles } from '@material-ui/core/styles'
 import { blue, green, red } from '@material-ui/core/colors'
 import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import Button from '@material-ui/core/Button'
@@ -18,8 +19,6 @@ import IconButton from '@material-ui/core/IconButton'
 import Snackbar from '@material-ui/core/Snackbar'
 import Backdrop from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
 import MicNone from '@material-ui/icons/MicNone'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { KeyUserInfo, storageGet } from '../../global/storage'
@@ -27,8 +26,11 @@ import { toast } from 'react-toastify'
 import moment from 'moment'
 import Alert from '@material-ui/lab/Alert'
 import { disableBodyScroll } from 'body-scroll-lock'
-import Box from '@material-ui/core/Box'
-import { isMobile } from 'react-device-detect'
+// import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft'
+// import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight'
+// import Box from '@material-ui/core/Box'
+// import InputBase from '@material-ui/core/InputBase'
+// import Divider from '@material-ui/core/Divider'
 
 const Word = styled(Paper)({
   fontSize: 'xxx-large',
@@ -375,6 +377,7 @@ export default class Index extends Component {
 
     return (
       <Container maxWidth="sm" className="demo-page">
+        <Progress variant="progress" steps={words.length} position="static" activeStep={wordIndex} />
         <Backdrop open={!begin || uploadingLock} style={{ zIndex: 1201 }}>
           <CircularProgress color="inherit" size={150} thickness={2} />
         </Backdrop>
@@ -401,12 +404,12 @@ export default class Index extends Component {
             </IconButton>
           </Grid>
           <audio ref={this.audioPlayRef} src={src} />
-          <Grid item xs={12}>
+          <Grid item xs={10}>
             <ValidationTextField
               ref={this.translationRef}
               label="Input translation here"
-              fullWidth
               required
+              fullWidth
               autoComplete="off"
               variant="outlined"
               id="validation-outlined-input"
@@ -415,6 +418,17 @@ export default class Index extends Component {
                 this.setState({ input: e.currentTarget.value })
               }}
             />
+          </Grid>
+          <Grid item xs={2}>
+            <Button
+              color="primary"
+              variant="text"
+              style={{ marginTop: 15 }}
+              onClick={this.onNext()}
+              disabled={buttonDisabled}
+            >
+              NEXT
+            </Button>
           </Grid>
           <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
             <IconButton
@@ -437,29 +451,30 @@ export default class Index extends Component {
               <MicNone style={{ fontSize: 80 }} />
             </IconButton>
           </Grid>
-          <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
-            {/*MuiContainer-maxWidthSm 复用container的CSS， @media 以及 maxWidth：600px*/}
-            <Box position="absolute" bottom={0} className="MuiContainer-maxWidthSm" width="100%">
-              <Progress
-                variant="progress"
-                steps={words.length}
-                position="static"
-                activeStep={wordIndex}
-                nextButton={
-                  <Button size="small" onClick={this.onNext()} disabled={buttonDisabled}>
-                    {wordIndex < words.length - 1 ? 'Next' : 'Finish'}
-                    {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-                  </Button>
-                }
-                // backButton={
-                //   <Button size="small" onClick={this.onClickBack} disabled>
-                //     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                //     Back
-                //   </Button>
-                // }
-              />
-            </Box>
-          </Grid>
+          {/*纪念一下, 绝对位置导致 grid 长度无法继承: 解决方案如下*/}
+          {/*<Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>*/}
+          {/*  /!*MuiContainer-maxWidthSm 复用container的CSS， @media 以及 maxWidth：600px*!/*/}
+          {/*  <Box position="absolute" bottom={0} className="MuiContainer-maxWidthSm" width="100%">*/}
+          {/*    <Progress*/}
+          {/*      variant="progress"*/}
+          {/*      steps={words.length}*/}
+          {/*      position="static"*/}
+          {/*      activeStep={wordIndex}*/}
+          {/*      nextButton={*/}
+          {/*        <Button size="small" onClick={this.onNext()} disabled={buttonDisabled}>*/}
+          {/*          {wordIndex < words.length - 1 ? 'Next' : 'Finish'}*/}
+          {/*          {ThemeProvider.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}*/}
+          {/*        </Button>*/}
+          {/*      }*/}
+          {/*      // backButton={*/}
+          {/*      //   <Button size="small" onClick={this.onClickBack} disabled>*/}
+          {/*      //     {ThemeProvider.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}*/}
+          {/*      //     Back*/}
+          {/*      //   </Button>*/}
+          {/*      // }*/}
+          {/*    />*/}
+          {/*  </Box>*/}
+          {/*</Grid>*/}
         </Grid>
       </Container>
     )

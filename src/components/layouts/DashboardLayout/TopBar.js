@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import clsx from 'clsx'
 import PropTypes from 'prop-types'
-import { AppBar, Badge, Box, Hidden, IconButton, Toolbar, makeStyles } from '@material-ui/core'
+import { AppBar, Box, Hidden, IconButton, Toolbar, makeStyles, Tooltip } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
-import NotificationsIcon from '@material-ui/icons/NotificationsOutlined'
 import InputIcon from '@material-ui/icons/Input'
 import Logo from 'components/Logo'
 
@@ -16,9 +15,13 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const TopBar = ({ className, onMobileNavOpen, ...rest }) => {
+const TopBar = ({ className, onMobileNavOpen, history, ...rest }) => {
   const classes = useStyles()
-  const [notifications] = useState([])
+
+  const logout = () => {
+    sessionStorage.removeItem('token')
+    history.push('/admin/login')
+  }
 
   return (
     <AppBar className={clsx(classes.root, className)} elevation={0} {...rest}>
@@ -27,16 +30,11 @@ const TopBar = ({ className, onMobileNavOpen, ...rest }) => {
           <Logo />
         </RouterLink>
         <Box flexGrow={1} />
-        <Hidden mdDown>
-          <IconButton color="inherit">
-            <Badge badgeContent={notifications.length} color="primary" variant="dot">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <IconButton color="inherit">
+        <Tooltip title="Logout" aria-label="logout">
+          <IconButton color="inherit" onClick={logout}>
             <InputIcon />
           </IconButton>
-        </Hidden>
+        </Tooltip>
         <Hidden lgUp>
           <IconButton color="inherit" onClick={onMobileNavOpen}>
             <MenuIcon />

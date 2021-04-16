@@ -167,21 +167,28 @@ const Results = ({ className, users, reload, history, ...rest }) => {
       <Card className={clsx(classes.root, className)} {...rest}>
         <Box minWidth={1050}>
           <Table
+            rowKey="id"
             rowSelection={{
               type: 'checkbox',
               ...rowSelection
             }}
             columns={columns}
             dataSource={users.filter(value => {
-              return value.name.search(filterUserName) !== -1
+              return value.name.toLowerCase().search(filterUserName.toLowerCase()) !== -1
             })}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: total => `Total ${total} Users`
+            }}
           />
           <Dialog open={!!deletePopInfo} onClose={handleClose}>
             <DialogTitle>Are you sure to delete?</DialogTitle>
             <DialogContent>
               <DialogContentText>it's a dangerous move!</DialogContentText>
               <DialogContentText>If you delete an User, then all of he's progress is wiped off too!</DialogContentText>
-              <DialogContentText>DeleteAnswers will only clear the user's progress...</DialogContentText>
+              <DialogContentText>Delete Answers will only clear the user's progress...</DialogContentText>
             </DialogContent>
             <DialogActions>
               <Button onClick={deleteAnswers} color="secondary">

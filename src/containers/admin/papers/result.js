@@ -2,22 +2,16 @@ import React, { useState } from 'react'
 import clsx from 'clsx'
 import PropTypes from 'prop-types'
 import moment from 'moment'
-import PerfectScrollbar from 'react-perfect-scrollbar'
-import {
-  Box,
-  Card,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-  makeStyles,
-  ButtonGroup,
-  Button
-} from '@material-ui/core'
+import Box from '@material-ui/core/Box'
+import Card from '@material-ui/core/Card'
+import ButtonGroup from '@material-ui/core/ButtonGroup'
+import Button from '@material-ui/core/Button'
+import Chip from '@material-ui/core/Chip'
+import { makeStyles } from '@material-ui/core/styles'
 import Editor from './editor/editor'
+import { Table } from 'antd'
+import api from 'api'
+import { toast } from 'react-toastify'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -26,132 +20,98 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Results = ({ className, datas, refreshPaper, ...rest }) => {
-  const classes = useStyles()
-  const [selectedCustomerIds, setSelectedCustomerIds] = useState([])
-  const [limit, setLimit] = useState(10)
-  const [page, setPage] = useState(0)
-  const [editProps, setEditProps] = useState({ open: false, refreshPaper: refreshPaper })
-
-  const handleSelectAll = event => {
-    let newSelectedCustomerIds
-
-    if (event.target.checked) {
-      newSelectedCustomerIds = datas.map(customer => customer.id)
-    } else {
-      newSelectedCustomerIds = []
-    }
-
-    setSelectedCustomerIds(newSelectedCustomerIds)
-  }
-
-  const handleSelectOne = (event, id) => {
-    const selectedIndex = selectedCustomerIds.indexOf(id)
-    let newSelectedCustomerIds = []
-
-    if (selectedIndex === -1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds, id)
-    } else if (selectedIndex === 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds.slice(1))
-    } else if (selectedIndex === selectedCustomerIds.length - 1) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(selectedCustomerIds.slice(0, -1))
-    } else if (selectedIndex > 0) {
-      newSelectedCustomerIds = newSelectedCustomerIds.concat(
-        selectedCustomerIds.slice(0, selectedIndex),
-        selectedCustomerIds.slice(selectedIndex + 1)
+const columns = [
+  { title: 'Id', dataIndex: 'id', sorter: (a, b) => a.id - b.id, sortDirections: ['ascend', 'descend', 'ascend'] },
+  { title: 'CreatedAt', dataIndex: 'created_at', render: createdAt => moment(createdAt).format('YYYY-MM-DD hh:mm:ss') },
+  {
+    title: 'Name',
+    render: paper =>
+      paper.inuse ? (
+        <span style={{ color: 'green', fontSize: 'x-large' }}>{paper.name}</span>
+      ) : (
+        <span>{paper.name}</span>
       )
-    }
-
-    setSelectedCustomerIds(newSelectedCustomerIds)
+  },
+  { title: 'Interval(/s)', dataIndex: 'interval' },
+  {
+    title: 'Words',
+    dataIndex: 'words',
+    render: words =>
+      words
+        // eslint-disable-next-line no-control-regex
+        .split(RegExp('[ \t\n]+'))
+        .map((word, index) => <Chip key={index} variant="outlined" size="small" label={word} color="primary" />)
+  },
+  {
+    title: 'Operation',
+    render: undefined
   }
+]
+const rowSelection = {
+  getCheckboxProps: paper => ({
+    paper_id: paper.id
+  })
+}
 
-  const handleLimitChange = event => {
-    setLimit(event.target.value)
-  }
-
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage)
-  }
+const Results = ({ className, papers, refreshPaper, ...rest }) => {
+  const classes = useStyles()
+  const [editProps, setEditProps] = useState({ open: false, refreshPaper: refreshPaper })
 
   const onClickEditExit = () => {
     setEditProps({ open: false })
   }
 
-  const handleEditClicked = e => {
-    const dataIndex = e.currentTarget.value
-    setEditProps({ open: true, onClickExit: onClickEditExit, data: datas[dataIndex], refreshPaper: refreshPaper })
+  const handleEditClicked = data => () => {
+    setEditProps({ open: true, onClickExit: onClickEditExit, data: data, refreshPaper: refreshPaper })
   }
+
+  const onClickPublish = pid => () => {
+    api.publishPaper({ pid: pid }).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        toast.success('success!')
+        refreshPaper()
+      }
+    })
+  }
+
+  columns[5].render = record => (
+    <ButtonGroup size="small">
+      <Button color="primary" onClick={handleEditClicked(record)}>
+        edit
+      </Button>
+      <Button color="primary" onClick={onClickPublish(record.id)}>
+        publish
+      </Button>
+      <Button color="secondary">delete</Button>
+    </ButtonGroup>
+  )
 
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
-      <Editor {...editProps} />
-      <PerfectScrollbar>
-        <Box minWidth={1050}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedCustomerIds.length === datas.length}
-                    color="primary"
-                    indeterminate={selectedCustomerIds.length > 0 && selectedCustomerIds.length < datas.length}
-                    onChange={handleSelectAll}
-                  />
-                </TableCell>
-                <TableCell>Id</TableCell>
-                <TableCell>CreatedAt</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Interval(/s)</TableCell>
-                <TableCell>Words</TableCell>
-                <TableCell align="center">Operation</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {datas.slice(0, limit).map((data, index) => (
-                <TableRow hover key={data.id} selected={selectedCustomerIds.indexOf(data.id) !== -1}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedCustomerIds.indexOf(data.id) !== -1}
-                      onChange={event => handleSelectOne(event, data.id)}
-                      value="true"
-                    />
-                  </TableCell>
-                  <TableCell>{data.id}</TableCell>
-                  <TableCell>{moment(data.created_at).format('YYYY-MM-DD hh:mm:ss')}</TableCell>
-                  <TableCell>{data.name}</TableCell>
-                  <TableCell>{data.interval}</TableCell>
-                  <TableCell>{data.words}</TableCell>
-                  <TableCell align="center">
-                    <ButtonGroup size="small">
-                      <Button color="primary" onClick={handleEditClicked} value={index}>
-                        edit
-                      </Button>
-                      <Button color="primary">publish</Button>
-                      <Button color="secondary">delete</Button>
-                    </ButtonGroup>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Box>
-      </PerfectScrollbar>
-      <TablePagination
-        component="div"
-        count={datas.length}
-        onChangePage={handlePageChange}
-        onChangeRowsPerPage={handleLimitChange}
-        page={page}
-        rowsPerPage={limit}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
+      <Editor {...editProps} type="edit" />
+      <Box minWidth={1050}>
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={papers}
+          rowSelection={{ ...rowSelection, type: 'checkbox' }}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: total => `Total ${total} Papers`
+          }}
+        />
+      </Box>
     </Card>
   )
 }
 
 Results.propTypes = {
   className: PropTypes.string,
-  datas: PropTypes.array.isRequired
+  papers: PropTypes.array.isRequired
 }
 
 export default Results

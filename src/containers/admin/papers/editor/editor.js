@@ -38,8 +38,9 @@ const Editor = props => {
   const classes = useStyles()
   const [words, setWords] = useState('') // {key:index, label:word}
   const [interval, setInterval] = useState(0)
+  const [name, setName] = useState('')
 
-  const onUpdateWords = () => {
+  const onUpdatePaper = () => {
     api.editPaper({ ...props.data, words: words, interval: interval }).then(res => {
       if (!res.success) {
         toast.error(res.info)
@@ -51,50 +52,55 @@ const Editor = props => {
     })
   }
 
+  const onAddPaper = () => {
+    api.addPaper({ name: name, interval: interval, words: words }).then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        toast.success('success!')
+        props.refreshPaper()
+        props.onClickExit()
+      }
+    })
+  }
+
+  const onClickOk = () => {
+    props.type === 'add' ? onAddPaper() : onUpdatePaper()
+  }
+
   const onUpdateInterval = e => {
     setInterval(parseInt(e.currentTarget.value))
   }
-
-  // useEffect(() => {
-  //   if (props.data) {
-  //     setWords(props.data.words)
-  //   }
-  // }, [props.data])
 
   const editWords = e => {
     setWords(e.currentTarget.value)
   }
 
-  // const handleAddWord = e => {
-  //   setWords(e.currentTarget.value)
-  // }
-  //
-  // const handleDeleteWord = chipToDelete => () => {
-  //   // setWords(words => words.filter((word, i) => i !== chipToDelete))
-  //   setWords(words =>
-  //     words
-  //       .split(' ')
-  //       .filter((word, i) => i !== chipToDelete)
-  //       .join(' ')
-  //   )
-  // }
+  const editName = e => {
+    setName(e.currentTarget.value)
+  }
 
   return (
     <Grid container>
       <Grid item xs={12}>
-        <Dialog
-          maxWidth="md"
-          fullWidth
-          open={props.open}
-          onClose={props.onClickExit}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            Id: {(props.data && props.data.id) || 0}; PaperName: {(props.data && props.data.name) || ''}
-          </DialogTitle>
+        <Dialog maxWidth="md" fullWidth open={props.open} onClose={props.onClickExit}>
+          {props.type === 'edit' && (
+            <DialogTitle>
+              Id: {(props.data && props.data.id) || 0}; PaperName: {(props.data && props.data.name) || ''}
+            </DialogTitle>
+          )}
           <DialogContent className={classes.root}>
             <Grid container>
+              {props.type === 'add' && (
+                <>
+                  <Grid item xs={2}>
+                    <InputLabel>Paper Name</InputLabel>
+                  </Grid>
+                  <Grid item xs={10} style={{ marginBottom: 20 }}>
+                    <TextField variant="standard" onChange={editName} />
+                  </Grid>
+                </>
+              )}
               <Grid item xs={2}>
                 <InputLabel>Interval (per/s)</InputLabel>
               </Grid>
@@ -118,23 +124,9 @@ const Editor = props => {
                 />
               </Grid>
             </Grid>
-
-            {/*{words.split(' ').map((word, i) => {*/}
-            {/*  return (*/}
-            {/*    <li key={i}>*/}
-            {/*      <Chip label={word} onDelete={handleDeleteWord(i)} className={classes.chip} />*/}
-            {/*    </li>*/}
-            {/*  )*/}
-            {/*})}*/}
-            {/*<li>*/}
-            {/*  <OutlinedInput className={classes.input} placeholder="Add here" />*/}
-            {/*  <IconButton type="submit">*/}
-            {/*    <Plus />*/}
-            {/*  </IconButton>*/}
-            {/*</li>*/}
           </DialogContent>
           <DialogActions>
-            <Button onClick={onUpdateWords} color="primary">
+            <Button onClick={onClickOk} color="primary">
               Ok
             </Button>
             <Button onClick={props.onClickExit} color="primary">

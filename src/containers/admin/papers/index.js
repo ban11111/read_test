@@ -45,7 +45,7 @@ const Papers = () => {
   return (
     <Page className={classes.root} title="Papers">
       <Container maxWidth={false}>
-        <Editor open={addNew} onClickExit={onClickX} />
+        <Editor open={addNew} onClickExit={onClickX} refreshPaper={getPapers} type="add" />
         <Box display="flex" justifyContent="flex-end">
           <Button color="primary" variant="contained" onClick={Add}>
             Add New Paper
@@ -57,7 +57,7 @@ const Papers = () => {
           </Typography>
         </Box>
         <Box mt={3}>
-          <Result datas={papers} refreshPaper={getPapers} />
+          <Result papers={papers} refreshPaper={getPapers} />
         </Box>
       </Container>
     </Page>

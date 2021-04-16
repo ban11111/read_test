@@ -10,12 +10,6 @@ export const columns = [
     render: text => <span>{text}</span>
   },
   {
-    title: 'Audio',
-    dataIndex: 'audio_url',
-    key: 'audio_url',
-    render: url => <span>{url ? 'yes' : 'no'}</span>
-  },
-  {
     title: 'Translation',
     dataIndex: 'translation',
     key: 'translation'
@@ -30,8 +24,7 @@ export const columns = [
     title: 'Action',
     dataIndex: 'audio_url',
     key: 'audio_url',
-    render: url => {
-      return <audio controls src={'/file/' + url} {...p} />
-    }
+    fixed: 'right',
+    render: url => (url ? <audio controls src={'/file/' + url} {...p} /> : '')
   }
 ]

@@ -27,7 +27,17 @@ const Detail = props => {
 
   return (
     <>
-      <Table columns={columns} dataSource={answers} />
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={answers}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: total => `Total ${total} Answers`
+        }}
+      />
     </>
   )
 }

@@ -70,6 +70,10 @@ export class Api {
     return this.post(`/api/v1/admin/add_paper`, payload)
   }
 
+  publishPaper = (payload: any) => {
+    return this.post(`/api/v1/admin/publish_paper`, payload)
+  }
+
   editPaper = (payload: any) => {
     return this.post(`/api/v1/admin/edit_paper`, payload)
   }
