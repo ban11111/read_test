@@ -18,7 +18,13 @@ import getInitials from 'utils/getInitials'
 import { Table } from 'antd'
 import api from 'api'
 import { toast } from 'react-toastify'
-import { CardContent, Input, InputAdornment, InputLabel, Select, SvgIcon, TextField } from '@material-ui/core'
+import CardContent from '@material-ui/core/CardContent'
+import Input from '@material-ui/core/Input'
+import InputAdornment from '@material-ui/core/InputAdornment'
+import InputLabel from '@material-ui/core/InputLabel'
+import Select from '@material-ui/core/Select'
+import SvgIcon from '@material-ui/core/SvgIcon'
+import TextField from '@material-ui/core/TextField'
 import { Search as SearchIcon } from 'react-feather'
 
 const useStyles = makeStyles(theme => ({
@@ -71,7 +77,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
   }
 
   const handleReview = () => {
-    history.push('/admin/users/' + reviewPopInfo.pid + '/' + reviewPopInfo.uid)
+    history.push('/admin/users/' + (reviewPopInfo.pid || reviewPapers[0].pid) + '/' + reviewPopInfo.uid)
   }
 
   const handleOpen = user => () => {
@@ -88,18 +94,16 @@ const Results = ({ className, users, reload, history, ...rest }) => {
       </Box>
     )
   }
-  columns[7].render = (uid, record) => {
-    return (
-      <ButtonGroup size="small">
-        <Button color="primary" onClick={handleReviewOpen(record)}>
-          review
-        </Button>
-        <Button color="secondary" onClick={handleOpen(uid)}>
-          delete
-        </Button>
-      </ButtonGroup>
-    )
-  }
+  columns[7].render = (uid, user) => (
+    <ButtonGroup size="small">
+      <Button color="primary" onClick={handleReviewOpen(user)} disabled={user.papers.length <= 0}>
+        review
+      </Button>
+      <Button color="secondary" onClick={handleOpen(uid)}>
+        delete
+      </Button>
+    </ButtonGroup>
+  )
 
   const handleChange = e => {
     setReviewPopInfo({ uid: reviewPopInfo.uid, pid: e.target.value })
@@ -217,7 +221,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
           <Dialog disableBackdropClick disableEscapeKeyDown open={!!reviewPopInfo} onClose={handleClose}>
             <DialogTitle>Select Paper</DialogTitle>
             <DialogContent>
-              <InputLabel htmlFor="demo-dialog-native">Age</InputLabel>
+              <InputLabel htmlFor="demo-dialog-native">paper</InputLabel>
               <Select
                 native
                 value={!!reviewPopInfo ? reviewPopInfo.pid : 0}
@@ -236,11 +240,11 @@ const Results = ({ className, users, reload, history, ...rest }) => {
               </Select>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose} color="primary">
-                Cancel
-              </Button>
               <Button onClick={handleReview} color="primary">
                 Ok
+              </Button>
+              <Button onClick={handleClose} color="primary">
+                Cancel
               </Button>
             </DialogActions>
           </Dialog>

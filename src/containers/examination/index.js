@@ -390,7 +390,7 @@ export default class Examination extends Component {
     const recording = status === 'recording'
 
     return (
-      <Container maxWidth="sm" className="demo-page">
+      <Container maxWidth="sm" className="exam-page">
         <Progress variant="progress" steps={words.length} position="static" activeStep={wordIndex} />
         <Backdrop open={!begin || uploadingLock} style={{ zIndex: 1201 }}>
           <CircularProgress color="inherit" size={150} thickness={2} />
@@ -420,7 +420,7 @@ export default class Examination extends Component {
             </IconButton>
           </Grid>
           <audio ref={this.audioPlayRef} src={src} />
-          <Grid item xs={10}>
+          <Grid item xs={12}>
             <ValidationTextField
               ref={this.translationRef}
               label="Input translation here"
@@ -435,13 +435,13 @@ export default class Examination extends Component {
               }}
             />
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={12}>
             <Button
               color="primary"
-              variant="text"
-              style={{ marginTop: 15 }}
+              variant="outlined"
+              style={{ marginTop: 15, float: 'right' }}
               onClick={this.onNext()}
-              disabled={buttonDisabled}
+              disabled={buttonDisabled || recording}
             >
               NEXT
             </Button>

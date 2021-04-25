@@ -21,6 +21,11 @@ export const columns = [
     render: duration => <span>{duration / 1000}秒</span>
   },
   {
+    title: 'Device',
+    dataIndex: 'device',
+    key: 'device'
+  },
+  {
     title: 'Action',
     dataIndex: 'audio_url',
     key: 'audio_url',
