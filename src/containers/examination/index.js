@@ -1,5 +1,5 @@
 import React, { Component, createRef } from 'react'
-// import { isMobile } from 'react-device-detect'
+import { isDesktop, isMobile, isTablet } from 'react-device-detect'
 import './index.css'
 import api from '../../api'
 import Recorder from 'recorder-core'
@@ -191,6 +191,7 @@ export default class Examination extends Component {
     formData.append('word', this.state.words[this.state.wordIndex])
     formData.append('translation', this.state.input)
     formData.append('duration', duration)
+    formData.append('device', isTablet ? 'tablet' : isMobile ? 'mobile' : isDesktop ? 'desktop' : 'unknown')
     api.uploadAudio(formData).then(resp => {
       if (!resp.success) {
         toast.error(resp.info + " -- if you can't go to next word, try refresh the page")

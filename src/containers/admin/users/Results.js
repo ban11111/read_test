@@ -224,6 +224,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
               <InputLabel htmlFor="demo-dialog-native">paper</InputLabel>
               <Select
                 native
+                fullWidth
                 value={!!reviewPopInfo ? reviewPopInfo.pid : 0}
                 onChange={handleChange}
                 input={<Input id="demo-dialog-native" />}
