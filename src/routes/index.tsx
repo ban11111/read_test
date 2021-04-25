@@ -1,7 +1,7 @@
 import React, { lazy } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import InfoPage from 'containers/info'
-import DemoPage from 'containers/demo'
+import ExamPage from 'containers/examination'
 import FinishPage from 'containers/finish'
 import DashboardLayout from 'components/layouts/DashboardLayout'
 import Dashboard from 'containers/admin/dashboard'
@@ -26,7 +26,7 @@ export class Routes extends React.Component<any> {
           <Route path="/instruction">
             <InstructionPage {...this.props} />
           </Route>
-          <Route path="/demo" component={DemoPage} />
+          <Route path="/examination" component={ExamPage} />
           <Route path="/finish" component={FinishPage} />
           <Redirect exact={true} from="/admin" to="/admin/login" />
           <Route path="/admin/login" component={AdminLogin} />
@@ -36,7 +36,7 @@ export class Routes extends React.Component<any> {
           <Route path="/admin/users" exact>
             <DashboardLayout components={Users} {...this.props} />
           </Route>
-          <Route path="/admin/users/:uid">
+          <Route path="/admin/users/:paper_id/:uid">
             <DashboardLayout components={Detail} {...this.props} />
           </Route>
           <Route path="/admin/papers">

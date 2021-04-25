@@ -18,7 +18,7 @@ import getInitials from 'utils/getInitials'
 import { Table } from 'antd'
 import api from 'api'
 import { toast } from 'react-toastify'
-import { CardContent, InputAdornment, SvgIcon, TextField } from '@material-ui/core'
+import { CardContent, Input, InputAdornment, InputLabel, Select, SvgIcon, TextField } from '@material-ui/core'
 import { Search as SearchIcon } from 'react-feather'
 
 const useStyles = makeStyles(theme => ({
@@ -62,9 +62,16 @@ const Results = ({ className, users, reload, history, ...rest }) => {
   const classes = useStyles()
   const [filterUserName, setFilterUserName] = useState('')
   const [deletePopInfo, setDeletePopInfo] = useState(0) // 只需要uid就可以了
+  const [reviewPopInfo, setReviewPopInfo] = useState(null) // {pid:0, uid:0}
+  const [reviewPapers, setReviewPapers] = useState([]) // [paper]
 
-  const handleReview = e => {
-    history.push('/admin/users/' + e.currentTarget.value)
+  const handleReviewOpen = user => () => {
+    setReviewPapers(user.papers)
+    setReviewPopInfo({ uid: user.id })
+  }
+
+  const handleReview = () => {
+    history.push('/admin/users/' + reviewPopInfo.pid + '/' + reviewPopInfo.uid)
   }
 
   const handleOpen = user => () => {
@@ -81,10 +88,10 @@ const Results = ({ className, users, reload, history, ...rest }) => {
       </Box>
     )
   }
-  columns[7].render = uid => {
+  columns[7].render = (uid, record) => {
     return (
       <ButtonGroup size="small">
-        <Button color="primary" onClick={handleReview} value={uid}>
+        <Button color="primary" onClick={handleReviewOpen(record)}>
           review
         </Button>
         <Button color="secondary" onClick={handleOpen(uid)}>
@@ -94,8 +101,13 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     )
   }
 
+  const handleChange = e => {
+    setReviewPopInfo({ uid: reviewPopInfo.uid, pid: e.target.value })
+  }
+
   const handleClose = () => {
     setDeletePopInfo(0)
+    setReviewPopInfo(null)
   }
 
   const deleteUser = () => {
@@ -199,6 +211,36 @@ const Results = ({ className, users, reload, history, ...rest }) => {
               </Button>
               <Button onClick={handleClose} color="primary">
                 Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <Dialog disableBackdropClick disableEscapeKeyDown open={!!reviewPopInfo} onClose={handleClose}>
+            <DialogTitle>Select Paper</DialogTitle>
+            <DialogContent>
+              <InputLabel htmlFor="demo-dialog-native">Age</InputLabel>
+              <Select
+                native
+                value={!!reviewPopInfo ? reviewPopInfo.pid : 0}
+                onChange={handleChange}
+                input={<Input id="demo-dialog-native" />}
+              >
+                {!!reviewPapers ? (
+                  reviewPapers.map(paper => (
+                    <option key={paper.pid} value={paper.pid}>
+                      {paper.p_name}
+                    </option>
+                  ))
+                ) : (
+                  <option aria-label="None" value="" />
+                )}
+              </Select>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleReview} color="primary">
+                Ok
               </Button>
             </DialogActions>
           </Dialog>

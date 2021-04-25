@@ -48,7 +48,7 @@ const InstructionPage = props => {
         disabled={!recordable}
         variant="outlined"
         onClick={() => {
-          props.history.push('/demo')
+          props.history.push('/examination')
         }}
       >
         Agree And Proceed

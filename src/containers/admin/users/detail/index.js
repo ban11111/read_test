@@ -8,7 +8,7 @@ const Detail = props => {
   const path = props.location.pathname.split('/')
   const req = {
     uid: parseInt(path.pop()),
-    paper_id: 1 // todo
+    paper_id: parseInt(path.pop()) || 1
   }
 
   const [answers, setAnswers] = useState([])
