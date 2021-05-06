@@ -14,6 +14,9 @@ import api from 'api'
 import { toast } from 'react-toastify'
 import { KeyUserInfo, storageSet } from 'global/storage'
 import { IsValidEmail } from 'utils/emailCheck'
+import Checkbox from '@material-ui/core/Checkbox'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import Collapse from '@material-ui/core/Collapse'
 
 // 本页面逻辑, 先登录(只用填email), 如果账户不存在则展示注册逻辑
 
@@ -21,8 +24,8 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+      <Link color="inherit" href="https://www.hanzi-readingtest.top/">
+        www.hanzi-readingtest.top
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -58,9 +61,18 @@ interface UserInfo {
   chinese_class: string
   hks_level: string
   ethnic_background: string
+  has_chinese_acquaintance: boolean
+  acquaintance_detail: string
 }
 
-type label = 'email' | 'name' | 'chinese_class' | 'hks_level' | 'ethnic_background'
+type label =
+  | 'email'
+  | 'name'
+  | 'chinese_class'
+  | 'hks_level'
+  | 'ethnic_background'
+  | 'has_chinese_acquaintance'
+  | 'acquaintance_detail'
 
 export default function InfoPage(props: any) {
   const classes = useStyles()
@@ -69,7 +81,9 @@ export default function InfoPage(props: any) {
     name: '',
     chinese_class: '',
     hks_level: '',
-    ethnic_background: ''
+    ethnic_background: '',
+    has_chinese_acquaintance: false,
+    acquaintance_detail: ''
   })
   const [emailInvalid, setEmailInvalid] = useState(false)
   const [needSignUp, setNeedSignUp] = useState(false)
@@ -81,6 +95,10 @@ export default function InfoPage(props: any) {
     if (l === 'email') {
       setEmailInvalid(!IsValidEmail(e.currentTarget.value))
     }
+  }
+
+  const onChecked = () => {
+    setUserInfo({ ...userInfo, has_chinese_acquaintance: !userInfo.has_chinese_acquaintance })
   }
 
   const signUp = () => {
@@ -205,6 +223,29 @@ export default function InfoPage(props: any) {
                   >
                     {userInfo.ethnic_background}
                   </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox onChange={onChecked} checked={userInfo.has_chinese_acquaintance} color="primary" />
+                    }
+                    label="Do you have any Chinese family members or relatives?"
+                    labelPlacement="end"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Collapse in={userInfo.has_chinese_acquaintance}>
+                    <TextField
+                      variant="outlined"
+                      fullWidth
+                      id="acquaintanceDetail"
+                      label="Acquaintance Detail"
+                      name="acquaintanceDetail"
+                      onChange={onEdit('acquaintance_detail')}
+                    >
+                      {userInfo.acquaintance_detail}
+                    </TextField>
+                  </Collapse>
                 </Grid>
               </>
             )}

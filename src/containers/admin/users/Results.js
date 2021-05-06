@@ -25,6 +25,7 @@ import InputLabel from '@material-ui/core/InputLabel'
 import Select from '@material-ui/core/Select'
 import SvgIcon from '@material-ui/core/SvgIcon'
 import TextField from '@material-ui/core/TextField'
+import CheckIcon from '@material-ui/icons/Check'
 import { Search as SearchIcon } from 'react-feather'
 
 const useStyles = makeStyles(theme => ({
@@ -44,10 +45,15 @@ const columns = [
   { title: 'HSK Level', dataIndex: 'hks_level' },
   { title: 'Ethnic Background', dataIndex: 'ethnic_background' },
   {
-    title: 'Exam Result',
-    render: () => {
-      return '这里展示做过哪些试卷？'
+    title: 'Has Chinese Acquaintance',
+    dataIndex: 'has_chinese_acquaintance',
+    render: has => {
+      return has ? <CheckIcon style={{ color: 'green' }} /> : ''
     }
+  },
+  {
+    title: 'Acquaintance Detail',
+    dataIndex: 'acquaintance_detail'
   },
   {
     title: 'RegisteredAt',
@@ -94,7 +100,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
       </Box>
     )
   }
-  columns[7].render = (uid, user) => (
+  columns[columns.length - 1].render = (uid, user) => (
     <ButtonGroup size="small">
       <Button color="primary" onClick={handleReviewOpen(user)} disabled={user.papers.length <= 0}>
         review

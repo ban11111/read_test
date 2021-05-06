@@ -45,8 +45,8 @@ const InstructionPage = props => {
       </Typography>
       <Divider />
       <ul style={{ marginTop: 40 }}>
-        <li {...listStyle}>Please enable recording permission if you see relative pop-up.</li>
         <li {...listStyle}>Please test in a quiet environment.</li>
+        <li {...listStyle}>Please enable recording permission if you see a relative pop-up.</li>
         <li {...listStyle}>
           Please click the record button and read the presented word. After reading the word, click the record button
           again to end.
