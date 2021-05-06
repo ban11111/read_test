@@ -255,56 +255,13 @@ export default class Examination extends Component {
     this.setState({ status: 'stopped', warningPopUp: false })
   }
 
-  mouseDown = () => {
-    this.recorded = true
-    this.setState({ status: 'recording' })
-    this.recStart()
-    document.onmouseup = this.mouseUp
-  }
-
-  mouseUp = () => {
-    document.onmouseup = null
-    this.recStop()
-    // 说明长按且超时了
-    if (this.state.warningPopUp) {
-      this.uploadLoop(this.state.paper_info.interval * 1000)
-    } else {
-      this.translationRef.current.lastChild.firstChild.focus()
-    }
-    this.setState({ status: 'stopped', warningPopUp: false })
-  }
-
-  touchUp = () => {
-    this.recStop()
-    // 说明长按且超时了
-    if (this.state.warningPopUp) {
-      this.uploadLoop(this.state.paper_info.interval * 1000)
-    } else {
-      this.translationRef.current.lastChild.firstChild.focus()
-    }
-    this.setState({ status: 'stopped', warningPopUp: false })
-  }
-
-  touchDown = () => {
-    this.recorded = true
-    this.setState({ status: 'recording' })
-    this.recStart()
-  }
-
   playAndStop = () => {
     this.audioPlayRef.current.play()
-  }
-
-  timesUpTouchUp = duration => () => {
-    document.onmouseup = null
-    this.uploadLoop(duration)
-    this.setState({ status: 'stopped', warningPopUp: false })
   }
 
   onNext = timesUp => () => {
     const duration = timesUp ? this.state.paper_info.interval * 1000 : moment().diff(this.beginTime, 'milliseconds')
     if (timesUp && this.state.status === 'recording') {
-      document.onmouseup = this.timesUpTouchUp(duration)
       this.setState({ warningPopUp: true })
       this.recStop()
     } else {
@@ -380,13 +337,23 @@ export default class Examination extends Component {
   renderWarningPopUp = () => {
     return (
       <Snackbar open={this.state.warningPopUp} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="warning">Sorry, time's up! Release button to enter the next word...</Alert>
+        <Alert severity="warning">Sorry, time's up! Click bottom button to enter the next word...</Alert>
       </Snackbar>
     )
   }
 
   render() {
-    const { begin, status, src, words, wordIndex, reRenderTimer, uploadingLock, buttonDisabled } = this.state
+    const {
+      begin,
+      status,
+      src,
+      words,
+      wordIndex,
+      reRenderTimer,
+      uploadingLock,
+      buttonDisabled,
+      warningPopUp
+    } = this.state
     const currentWord = words[wordIndex]
     const recording = status === 'recording'
 
@@ -434,6 +401,7 @@ export default class Examination extends Component {
               onChange={e => {
                 this.setState({ input: e.currentTarget.value })
               }}
+              disabled={warningPopUp}
             />
           </Grid>
           <Grid item xs={12}>

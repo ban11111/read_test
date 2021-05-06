@@ -12,6 +12,7 @@ import Editor from './editor/editor'
 import { Table } from 'antd'
 import api from 'api'
 import { toast } from 'react-toastify'
+import { markDuplicates } from '../../../utils/duplicate'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -37,10 +38,16 @@ const columns = [
     title: 'Words',
     dataIndex: 'words',
     render: words =>
-      words
-        // eslint-disable-next-line no-control-regex
-        .split(RegExp('[ \t\n]+'))
-        .map((word, index) => <Chip key={index} variant="outlined" size="small" label={word} color="primary" />)
+      // eslint-disable-next-line no-control-regex
+      markDuplicates(words.split(RegExp('[ \t\n]+'))).map((item, index) => (
+        <Chip
+          key={index}
+          variant="outlined"
+          size="small"
+          label={item.word}
+          color={item.dup ? 'secondary' : 'primary'}
+        />
+      ))
   },
   {
     title: 'Operation',

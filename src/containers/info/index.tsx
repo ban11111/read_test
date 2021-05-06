@@ -111,7 +111,7 @@ export default function InfoPage(props: any) {
         if (resp.data.user_not_exist) {
           setNeedSignUp(true)
         } else {
-          toast.info('🦄 welcome ' + resp.data.user.name)
+          toast.info('🦄 welcome ' + resp.data.user.name, { autoClose: 999 })
           storageSet(KeyUserInfo, resp.data.user) // 这里后端直接回传完整用户信息
           props.history.push('/instruction')
         }
@@ -199,7 +199,7 @@ export default function InfoPage(props: any) {
                     required
                     fullWidth
                     id="ethnicBackground"
-                    label=" Ethnic Background (Kinh/Hoa/...)"
+                    label="Ethnic Background"
                     name="ethnicBackground"
                     onChange={onEdit('ethnic_background')}
                   >
