@@ -308,7 +308,7 @@ export default class Examination extends Component {
   renderCountDown = wordIndex => {
     return (
       <CountdownCircleTimer
-        isPlaying={!this.state.uploadingLock}
+        isPlaying={this.state.begin && !this.state.uploadingLock}
         duration={this.state.paper_info.interval}
         size={60}
         strokeWidth={8}
