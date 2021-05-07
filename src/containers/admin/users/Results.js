@@ -56,7 +56,7 @@ const columns = [
       return moment(time).format('YYYY-MM-DD hh:mm:ss')
     }
   },
-  { title: 'Operation', dataIndex: 'id', render: undefined }
+  { title: 'Operation', dataIndex: 'id', render: undefined, fixed: 'right' }
 ]
 const rowSelection = {
   getCheckboxProps: user => ({
@@ -181,8 +181,9 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     <>
       {toolBar()}
       <Card className={clsx(classes.root, className)} {...rest}>
-        <Box minWidth={1050}>
+        <Box minWidth={600}>
           <Table
+            scroll={{ x: true }}
             rowKey="id"
             rowSelection={{
               type: 'checkbox',

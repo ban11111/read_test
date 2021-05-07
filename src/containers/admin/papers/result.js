@@ -51,7 +51,8 @@ const columns = [
   },
   {
     title: 'Operation',
-    render: undefined
+    render: undefined,
+    fixed: 'right'
   }
 ]
 const rowSelection = {
@@ -98,8 +99,9 @@ const Results = ({ className, papers, refreshPaper, ...rest }) => {
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
       <Editor {...editProps} type="edit" />
-      <Box minWidth={1050}>
+      <Box minWidth={600}>
         <Table
+          scroll={{ x: true }}
           rowKey="id"
           columns={columns}
           dataSource={papers}

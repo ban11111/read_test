@@ -5,6 +5,8 @@ import Result from './result'
 import Editor from './editor/editor'
 import api from 'api'
 import { toast } from 'react-toastify'
+import { Spin } from 'antd'
+import { antIcon } from 'utils/spinIcon'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,9 +22,11 @@ const Papers = () => {
   const [papers, setPapers] = useState([])
   const [activePaper, setActivePaper] = useState({})
   const [addNew, setAddNew] = useState(false)
+  const [spin, setSpin] = useState(true)
 
   const getPapers = () => {
     api.queryPapers().then(res => {
+      setSpin(false)
       if (!res.success) {
         toast.error(res.info)
       } else {
@@ -57,7 +61,9 @@ const Papers = () => {
           </Typography>
         </Box>
         <Box mt={3}>
-          <Result papers={papers} refreshPaper={getPapers} />
+          <Spin indicator={antIcon} spinning={spin}>
+            <Result papers={papers} refreshPaper={getPapers} />
+          </Spin>
         </Box>
       </Container>
     </Page>

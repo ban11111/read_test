@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Table } from 'antd'
+import { Spin, Table } from 'antd'
 import { columns } from './const'
 import { toast } from 'react-toastify'
 import api from 'api'
+import { antIcon } from 'utils/spinIcon'
 
 const Detail = props => {
   const path = props.location.pathname.split('/')
@@ -12,9 +13,11 @@ const Detail = props => {
   }
 
   const [answers, setAnswers] = useState([])
+  const [spin, setSpin] = useState(true)
 
   const getAnswers = () => {
     api.QueryAnswers(req).then(res => {
+      setSpin(false)
       if (!res.success) {
         toast.error(res.info)
       } else {
@@ -26,7 +29,7 @@ const Detail = props => {
   useEffect(getAnswers, [])
 
   return (
-    <>
+    <Spin indicator={antIcon} spinning={spin}>
       <Table
         rowKey="id"
         columns={columns}
@@ -38,7 +41,7 @@ const Detail = props => {
           showTotal: total => `Total ${total} Answers`
         }}
       />
-    </>
+    </Spin>
   )
 }
 
