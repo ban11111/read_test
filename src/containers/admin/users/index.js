@@ -11,8 +11,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     backgroundColor: theme.palette.background.dark,
     minHeight: '100%',
-    paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
+    paddingBottom: theme.spacing(1),
+    paddingTop: theme.spacing(1)
   }
 }))
 
@@ -39,7 +39,7 @@ const Users = props => {
   return (
     <Page className={classes.root} title="Customers">
       <Container maxWidth={false}>
-        <Box mt={3} style={{ minWidth: 1099 }}>
+        <Box mt={3} style={{ minWidth: 600 }}>
           {/*// todo dont use another page, use sub component */}
           <Spin indicator={antIcon} spinning={spin}>
             <Results users={users} reload={getUsers} history={props.history} />

@@ -101,6 +101,7 @@ const Results = ({ className, papers, refreshPaper, ...rest }) => {
       <Editor {...editProps} type="edit" />
       <Box minWidth={600}>
         <Table
+          size="small"
           scroll={{ x: true }}
           rowKey="id"
           columns={columns}

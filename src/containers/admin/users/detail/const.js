@@ -18,7 +18,7 @@ export const columns = [
     title: 'Duration',
     dataIndex: 'duration',
     key: 'duration',
-    render: duration => <span>{duration / 1000}秒</span>
+    render: duration => <span>{duration / 1000}s</span>
   },
   {
     title: 'Device',

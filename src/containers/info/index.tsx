@@ -90,11 +90,14 @@ export default function InfoPage(props: any) {
 
   const onEdit = (l: label) => (e: ChangeEvent<HTMLInputElement>) => {
     const newUserInfo: UserInfo = userInfo
-    const value = e.currentTarget.value.toLowerCase()
-    newUserInfo[l] = value
-    setUserInfo(newUserInfo)
     if (l === 'email') {
+      const value = e.currentTarget.value.toLowerCase()
+      newUserInfo[l] = value
+      setUserInfo(newUserInfo)
       setEmailInvalid(!IsValidEmail(value))
+    } else if (l !== 'has_chinese_acquaintance') {
+      newUserInfo[l] = e.currentTarget.value
+      setUserInfo(newUserInfo)
     }
   }
 

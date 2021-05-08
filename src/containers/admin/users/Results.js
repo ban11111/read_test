@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(2)
   },
   toolBar: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(1)
   }
 }))
 
@@ -45,7 +45,7 @@ const columns = [
   { title: 'HSK Level', dataIndex: 'hks_level' },
   { title: 'Ethnic Background', dataIndex: 'ethnic_background' },
   {
-    title: 'Has Chinese Acquaintance',
+    title: 'CN-relation',
     dataIndex: 'has_chinese_acquaintance',
     render: has => {
       return has ? <CheckIcon style={{ color: 'green' }} /> : ''
@@ -160,6 +160,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
             <CardContent>
               <Box maxWidth={500}>
                 <TextField
+                  size="small"
                   fullWidth
                   InputProps={{
                     startAdornment: (
@@ -187,8 +188,9 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     <>
       {toolBar()}
       <Card className={clsx(classes.root, className)} {...rest}>
-        <Box minWidth={600}>
+        <Box>
           <Table
+            size="small"
             scroll={{ x: true }}
             rowKey="id"
             rowSelection={{
@@ -210,7 +212,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
             <DialogTitle>Are you sure to delete?</DialogTitle>
             <DialogContent>
               <DialogContentText>it's a dangerous move!</DialogContentText>
-              <DialogContentText>If you delete an User, then all of he's progress is wiped off too!</DialogContentText>
+              <DialogContentText>If you delete an User, then all of his progress is wiped off too!</DialogContentText>
               <DialogContentText>Delete Answers will only clear the user's progress...</DialogContentText>
             </DialogContent>
             <DialogActions>

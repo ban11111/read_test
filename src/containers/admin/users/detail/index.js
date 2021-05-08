@@ -31,6 +31,7 @@ const Detail = props => {
   return (
     <Spin indicator={antIcon} spinning={spin}>
       <Table
+        size="small"
         rowKey="id"
         columns={columns}
         dataSource={answers}
