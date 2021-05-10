@@ -27,6 +27,7 @@ import SvgIcon from '@material-ui/core/SvgIcon'
 import TextField from '@material-ui/core/TextField'
 import CheckIcon from '@material-ui/icons/Check'
 import { Search as SearchIcon } from 'react-feather'
+import downloadFile from 'utils/download'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -147,11 +148,45 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     setFilterUserName(e.currentTarget.value)
   }
 
+  const onClickExport = () => {
+    api.exportData('answer', 'xlsx').then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        downloadFile(res)
+      }
+    })
+  }
+
+  const renderExportPopup = () => {
+    return (
+      <Dialog open={!!deletePopInfo} onClose={handleClose}>
+        <DialogTitle>Are you sure to delete?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>it's a dangerous move!</DialogContentText>
+          <DialogContentText>If you delete an User, then all of his progress is wiped off too!</DialogContentText>
+          <DialogContentText>Delete Answers will only clear the user's progress...</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={deleteAnswers} color="secondary">
+            Delete Answers
+          </Button>
+          <Button onClick={deleteUser} color="secondary">
+            Delete User
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
   const toolBar = () => {
     return (
       <div className={classes.toolBar}>
         <Box display="flex" justifyContent="flex-end">
-          <Button color="primary" variant="contained">
+          <Button color="primary" variant="contained" onClick={onClickExport}>
             Export Data
           </Button>
         </Box>
@@ -208,6 +243,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
               showTotal: total => `Total ${total} Users`
             }}
           />
+          {renderExportPopup()}
           <Dialog open={!!deletePopInfo} onClose={handleClose}>
             <DialogTitle>Are you sure to delete?</DialogTitle>
             <DialogContent>

@@ -9,12 +9,15 @@ export interface Response {
   success: boolean
   info?: string
   data: any
+  headers: any
+  status: number
 }
 
 export interface Res<T> {
   success: boolean
   info?: string
   data?: T
+  headers?: any
 }
 
 type requestFun = () => AxiosPromise<Response>
@@ -37,11 +40,12 @@ export const wrapSend = async <T>(requestFunc: requestFun, type?: string): Promi
   let response
   try {
     const res = await requestFunc()
-    const { data } = res
+    const { data, headers } = res
     response = {
-      success: type ? true : data.success,
+      success: type ? res.status === 200 : data.success,
       info: data.info,
-      data: type ? data : data.data
+      data: type ? data : data.data,
+      headers: headers
     }
   } catch (err) {
     const { data } = err.response

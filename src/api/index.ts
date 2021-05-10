@@ -101,6 +101,11 @@ export class Api {
   updateSetting = (payload: any) => {
     return this.post(`/api/v1/admin/update_setting`, payload)
   }
+
+  // exporter
+  exportData = (table: string, ext: string, payload?: any) => {
+    return this.download('/api/v1/admin/export/' + table + '/' + ext, payload)
+  }
 }
 
 const getAPI = (request: ReqType) => new Api(request)
