@@ -103,8 +103,8 @@ export class Api {
   }
 
   // exporter
-  exportData = (table: string, ext: string, payload?: any) => {
-    return this.download('/api/v1/admin/export/' + table + '/' + ext, payload)
+  exportData = (payload?: any) => {
+    return this.download('/api/v1/admin/export', payload)
   }
 }
 

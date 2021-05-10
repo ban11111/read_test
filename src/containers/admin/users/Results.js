@@ -71,12 +71,17 @@ const rowSelection = {
   })
 }
 
-const Results = ({ className, users, reload, history, ...rest }) => {
+const Results = ({ className, users, papers, reload, history, ...rest }) => {
   const classes = useStyles()
   const [filterUserName, setFilterUserName] = useState('')
   const [deletePopInfo, setDeletePopInfo] = useState(0) // 只需要uid就可以了
   const [reviewPopInfo, setReviewPopInfo] = useState(null) // {pid:0, uid:0}
   const [reviewPapers, setReviewPapers] = useState([]) // [paper]
+  const [exportPopup, setExportPopup] = useState(false)
+  const [selectedUsers, setSelectedUsers] = useState([]) // [uid]
+  const [exportPaperId, setExportPaperId] = useState(0) // paper_id
+  const [ext, setExt] = useState('csv') // csv or xlsx
+  const [selectedOnly, setSelectedOnly] = useState(false)
 
   const handleReviewOpen = user => () => {
     setReviewPapers(user.papers)
@@ -119,6 +124,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
   const handleClose = () => {
     setDeletePopInfo(0)
     setReviewPopInfo(null)
+    setExportPopup(false)
   }
 
   const deleteUser = () => {
@@ -148,8 +154,12 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     setFilterUserName(e.currentTarget.value)
   }
 
-  const onClickExport = () => {
-    api.exportData('answer', 'xlsx').then(res => {
+  const onClickExport = table => () => {
+    const req = { table: table, ext: ext, paper_id: Number(exportPaperId) }
+    if (!!selectedUsers && selectedOnly) {
+      req['ids'] = selectedUsers
+    }
+    api.exportData(req).then(res => {
       if (!res.success) {
         toast.error(res.info)
       } else {
@@ -159,22 +169,58 @@ const Results = ({ className, users, reload, history, ...rest }) => {
   }
 
   const renderExportPopup = () => {
+    if (exportPaperId === 0 && papers.length > 0) {
+      setExportPaperId(papers[papers.length - 1].id)
+    }
     return (
-      <Dialog open={!!deletePopInfo} onClose={handleClose}>
-        <DialogTitle>Are you sure to delete?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>it's a dangerous move!</DialogContentText>
-          <DialogContentText>If you delete an User, then all of his progress is wiped off too!</DialogContentText>
-          <DialogContentText>Delete Answers will only clear the user's progress...</DialogContentText>
+      <Dialog open={!!exportPopup} onClose={handleClose}>
+        <DialogTitle>Ready to export data?</DialogTitle>
+        <DialogContent style={{ marginBottom: 30 }}>
+          <DialogContentText>export csv for less network bandwidth consumption...</DialogContentText>
+          <Box display="flex">
+            <Box marginRight={5} width={'40%'}>
+              <InputLabel>select paper</InputLabel>
+              <Select
+                native
+                fullWidth
+                value={exportPaperId}
+                onChange={e => {
+                  setExportPaperId(e.currentTarget.value)
+                }}
+                input={<Input id="export-select-paper" />}
+              >
+                {papers.map(paper => (
+                  <option key={paper.id} value={paper.id}>
+                    {paper.name}
+                  </option>
+                ))}
+              </Select>
+            </Box>
+            <Box width={'40%'}>
+              <InputLabel>select Extension</InputLabel>
+              <Select
+                native
+                fullWidth
+                value={ext}
+                onChange={e => {
+                  setExt(e.currentTarget.value)
+                }}
+                input={<Input id="export-select-paper" />}
+              >
+                <option value="csv">csv</option>
+                <option value="xlsx">xlsx</option>
+              </Select>
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={deleteAnswers} color="secondary">
-            Delete Answers
+          <Button onClick={onClickExport('user')} color="primary">
+            Export Users
           </Button>
-          <Button onClick={deleteUser} color="secondary">
-            Delete User
+          <Button onClick={onClickExport('answer')} color="primary">
+            Export Answers
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="default">
             Cancel
           </Button>
         </DialogActions>
@@ -186,8 +232,27 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     return (
       <div className={classes.toolBar}>
         <Box display="flex" justifyContent="flex-end">
-          <Button color="primary" variant="contained" onClick={onClickExport}>
-            Export Data
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              setExportPopup(true)
+              setSelectedOnly(true)
+            }}
+            disabled={selectedUsers.length <= 0}
+          >
+            Export Selected
+          </Button>
+          <Button
+            style={{ marginLeft: 12 }}
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              setExportPopup(true)
+              setSelectedOnly(false)
+            }}
+          >
+            Export All
           </Button>
         </Box>
         <Box mt={3}>
@@ -219,6 +284,14 @@ const Results = ({ className, users, reload, history, ...rest }) => {
     )
   }
 
+  const onSelect = (record, selected, selectedRows) => {
+    setSelectedUsers(selectedRows.map(user => user.id))
+  }
+
+  const onSelectAll = (selected, selectedRows) => {
+    setSelectedUsers(selectedRows.map(user => user.id))
+  }
+
   return (
     <>
       {toolBar()}
@@ -230,7 +303,9 @@ const Results = ({ className, users, reload, history, ...rest }) => {
             rowKey="id"
             rowSelection={{
               type: 'checkbox',
-              ...rowSelection
+              ...rowSelection,
+              onSelect: onSelect,
+              onSelectAll: onSelectAll
             }}
             columns={columns}
             dataSource={users.filter(value => {
@@ -266,7 +341,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
           <Dialog disableBackdropClick disableEscapeKeyDown open={!!reviewPopInfo} onClose={handleClose}>
             <DialogTitle>Select Paper</DialogTitle>
             <DialogContent>
-              <InputLabel htmlFor="demo-dialog-native">paper</InputLabel>
+              <InputLabel>paper</InputLabel>
               <Select
                 native
                 fullWidth
@@ -303,6 +378,7 @@ const Results = ({ className, users, reload, history, ...rest }) => {
 Results.propTypes = {
   className: PropTypes.string,
   users: PropTypes.array.isRequired,
+  papers: PropTypes.array.isRequired,
   history: PropTypes.any
 }
 

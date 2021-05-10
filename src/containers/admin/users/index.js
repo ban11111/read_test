@@ -19,6 +19,7 @@ const useStyles = makeStyles(theme => ({
 const Users = props => {
   const classes = useStyles()
   const [users, setUsers] = useState([])
+  const [papers, setPapers] = useState([])
   const [spin, setSpin] = useState(true)
 
   const getUsers = () => {
@@ -32,8 +33,24 @@ const Users = props => {
     })
   }
 
-  useEffect(() => {
+  const getPapers = () => {
+    api.queryPapers().then(res => {
+      if (!res.success) {
+        toast.error(res.info)
+      } else {
+        setPapers(res.data.papers)
+      }
+    })
+  }
+
+  const getAllInfo = () => {
+    getPapers()
     getUsers()
+  }
+
+  useEffect(() => {
+    getAllInfo()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -42,7 +59,7 @@ const Users = props => {
         <Box mt={3} style={{ minWidth: 600 }}>
           {/*// todo dont use another page, use sub component */}
           <Spin indicator={antIcon} spinning={spin}>
-            <Results users={users} reload={getUsers} history={props.history} />
+            <Results users={users} papers={papers} reload={getAllInfo} history={props.history} />
           </Spin>
         </Box>
       </Container>
