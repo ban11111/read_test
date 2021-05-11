@@ -55,10 +55,11 @@ export class Api {
   }
 
   // =====  admin  =====
-  adminLogin = (payload: any, callback: callbackFunc): void => {
+  adminLogin = (payload: any, resCb: callbackFunc, nextCb: () => void): void => {
     this.post(`/api/v1/admin/login`, payload).then(res => {
-      callback(res)
+      resCb(res)
       this.refreshRequest()
+      nextCb()
     })
   }
 
