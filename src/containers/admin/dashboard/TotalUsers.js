@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const TotalCustomers = ({ className, ...rest }) => {
+const TotalUsers = ({ className, statistics, ...rest }) => {
   const classes = useStyles()
 
   return (
@@ -35,7 +35,7 @@ const TotalCustomers = ({ className, ...rest }) => {
               TOTAL USERS
             </Typography>
             <Typography color="textPrimary" variant="h3">
-              1,600
+              {!!statistics ? statistics.total_users : 'loading...'}
             </Typography>
           </Grid>
           <Grid item>
@@ -47,7 +47,7 @@ const TotalCustomers = ({ className, ...rest }) => {
         <Box mt={2} display="flex" alignItems="center">
           <ArrowUpwardIcon className={classes.differenceIcon} />
           <Typography className={classes.differenceValue} variant="body2">
-            16%
+            {!!statistics ? ((statistics.current_month_users / statistics.total_users) * 100).toFixed(2) : 0}%
           </Typography>
           <Typography color="textSecondary" variant="caption">
             Since last month
@@ -58,8 +58,9 @@ const TotalCustomers = ({ className, ...rest }) => {
   )
 }
 
-TotalCustomers.propTypes = {
-  className: PropTypes.string
+TotalUsers.propTypes = {
+  className: PropTypes.string,
+  statistics: PropTypes.object
 }
 
-export default TotalCustomers
+export default TotalUsers

@@ -102,6 +102,10 @@ export class Api {
     return this.post(`/api/v1/admin/update_setting`, payload)
   }
 
+  queryStatistics = () => {
+    return this.post('/api/v1/admin/statistics')
+  }
+
   // exporter
   exportData = (payload?: any) => {
     return this.download('/api/v1/admin/export', payload)

@@ -15,19 +15,22 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const TasksProgress = ({ className, ...rest }) => {
+const TasksProgress = ({ className, statistics, ...rest }) => {
   const classes = useStyles()
 
+  const progress = () => {
+    return !!statistics ? (Number(statistics.total_progress) * 100).toFixed(2) : 0
+  }
   return (
     <Card className={clsx(classes.root, className)} {...rest}>
       <CardContent>
         <Grid container justify="space-between" spacing={3}>
           <Grid item>
             <Typography color="textSecondary" gutterBottom variant="h6">
-              TASKS PROGRESS
+              ACTIVE PAPER's PROGRESS
             </Typography>
             <Typography color="textPrimary" variant="h3">
-              75.5%
+              {progress()}%
             </Typography>
           </Grid>
           <Grid item>
@@ -37,7 +40,7 @@ const TasksProgress = ({ className, ...rest }) => {
           </Grid>
         </Grid>
         <Box mt={3}>
-          <LinearProgress value={75.5} variant="determinate" />
+          <LinearProgress value={Number(progress())} variant="determinate" />
         </Box>
       </CardContent>
     </Card>
@@ -45,7 +48,8 @@ const TasksProgress = ({ className, ...rest }) => {
 }
 
 TasksProgress.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  statistics: PropTypes.object
 }
 
 export default TasksProgress

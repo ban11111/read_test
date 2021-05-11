@@ -1,34 +1,64 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Bar } from 'react-chartjs-2'
 import { Box, Button, Card, CardContent, CardHeader, Divider, useTheme, makeStyles, colors } from '@material-ui/core'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
+import PropTypes from 'prop-types'
 
 const useStyles = makeStyles(() => ({
   root: {}
 }))
 
-const Sales = props => {
+const defaultCount = {
+  new_user: [],
+  new_answer: [],
+  labels: []
+}
+
+const defaultChart = {
+  daily: defaultCount,
+  monthly: defaultCount
+}
+
+const styleOptions = {
+  barThickness: 15,
+  maxBarThickness: 15,
+  barPercentage: 0.5,
+  categoryPercentage: 0.5
+}
+
+const Statistics = props => {
   const classes = useStyles()
   const theme = useTheme()
+  const [daily, setDaily] = useState(true)
 
-  const data = {
-    datasets: [
-      {
-        backgroundColor: colors.indigo[500],
-        data: [18, 5, 19, 27, 29, 19, 20],
-        label: 'This year'
-      },
-      {
-        backgroundColor: colors.grey[200],
-        data: [11, 20, 12, 29, 30, 25, 13],
-        label: 'Last year'
-      }
-    ],
-    labels: ['1 Aug', '2 Aug', '3 Aug', '4 Aug', '5 Aug', '6 Aug']
+  const chart = !!props.statistics ? props.statistics.chart : defaultChart
+
+  const data = () => {
+    return {
+      datasets: [
+        {
+          ...styleOptions,
+          backgroundColor: colors.indigo[500],
+          data: daily ? chart.daily.new_answer : chart.monthly.new_answer,
+          label: 'New Answer'
+        },
+        {
+          ...styleOptions,
+          backgroundColor: colors.green[100],
+          data: daily ? chart.daily.new_user : chart.monthly.new_user,
+          label: 'New user'
+        }
+      ],
+      labels: daily ? chart.daily.labels : chart.monthly.labels
+    }
   }
 
-  const options = {
+  const toggleDailyOrMonthly = () => {
+    setDaily(!daily)
+  }
+
+  const chartOptions = {
     animation: false,
     cornerRadius: 20,
     layout: { padding: 0 },
@@ -38,10 +68,6 @@ const Sales = props => {
     scales: {
       xAxes: [
         {
-          barThickness: 12,
-          maxBarThickness: 10,
-          barPercentage: 0.5,
-          categoryPercentage: 0.5,
           ticks: {
             fontColor: theme.palette.text.secondary
           },
@@ -87,16 +113,16 @@ const Sales = props => {
     <Card className={classes.root}>
       <CardHeader
         action={
-          <Button endIcon={<ArrowDropDownIcon />} size="small" variant="text">
-            Last 7 days
+          <Button endIcon={<ArrowDropDownIcon />} size="small" variant="text" onClick={toggleDailyOrMonthly}>
+            Switch to {daily ? 'Last 7 months' : 'Last 7 days'}
           </Button>
         }
-        title="Latest Sales"
+        title="Latest Statistics"
       />
       <Divider />
       <CardContent>
         <Box height={400} position="relative">
-          <Bar data={data} options={options} />
+          <Bar data={data()} options={chartOptions} />
         </Box>
       </CardContent>
       <Divider />
@@ -107,7 +133,7 @@ const Sales = props => {
           size="small"
           variant="text"
           onClick={() => {
-            props.history.push('/admin/papers')
+            props.history.push('/admin/users')
           }}
         >
           Overview
@@ -117,8 +143,9 @@ const Sales = props => {
   )
 }
 
-// Sales.propTypes = {
-//   className: PropTypes.string
-// }
+Statistics.propTypes = {
+  className: PropTypes.string,
+  statistics: PropTypes.object
+}
 
-export default Sales
+export default Statistics

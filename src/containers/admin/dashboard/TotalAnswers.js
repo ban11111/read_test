@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const TotalProfit = ({ className, ...rest }) => {
+const TotalAnswers = ({ className, statistics, ...rest }) => {
   const classes = useStyles()
 
   return (
@@ -24,10 +24,10 @@ const TotalProfit = ({ className, ...rest }) => {
         <Grid container justify="space-between" spacing={3}>
           <Grid item>
             <Typography color="textSecondary" gutterBottom variant="h6">
-              TOTAL PROFIT
+              TOTAL ANSWERS
             </Typography>
             <Typography color="textPrimary" variant="h3">
-              $23,200
+              {!!statistics ? statistics.total_answers : 'loading...'}
             </Typography>
           </Grid>
           <Grid item>
@@ -41,8 +41,9 @@ const TotalProfit = ({ className, ...rest }) => {
   )
 }
 
-TotalProfit.propTypes = {
-  className: PropTypes.string
+TotalAnswers.propTypes = {
+  className: PropTypes.string,
+  statistics: PropTypes.object
 }
 
-export default TotalProfit
+export default TotalAnswers

@@ -16,6 +16,7 @@ import {
 import LaptopMacIcon from '@material-ui/icons/LaptopMac'
 import PhoneIcon from '@material-ui/icons/Phone'
 import TabletIcon from '@material-ui/icons/Tablet'
+import QuestionIcon from '@material-ui/icons/Help'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,26 +24,32 @@ const useStyles = makeStyles(() => ({
   }
 }))
 
-const TrafficByDevice = ({ className, ...rest }) => {
+const defaultDevice = { desktop: 0, tablet: 0, mobile: 0, unknown: 0 }
+
+const TrafficByDevice = ({ className, statistics, ...rest }) => {
   const classes = useStyles()
   const theme = useTheme()
 
-  const data = {
-    datasets: [
-      {
-        data: [63, 15, 22],
-        backgroundColor: [colors.indigo[500], colors.red[600], colors.orange[600]],
-        borderWidth: 8,
-        borderColor: colors.common.white,
-        hoverBorderColor: colors.common.white
-      }
-    ],
-    labels: ['Desktop', 'Tablet', 'Mobile']
-  }
+  const device = !!statistics ? statistics.device : defaultDevice
+  const sum = device.unknown + device.mobile + device.tablet + device.desktop || 1
 
+  const data = () => {
+    return {
+      datasets: [
+        {
+          data: [device.desktop, device.tablet, device.mobile, device.unknown],
+          backgroundColor: [colors.indigo[500], colors.red[600], colors.orange[600], colors.grey[600]],
+          borderWidth: 4,
+          borderColor: colors.common.white,
+          hoverBorderColor: colors.common.white
+        }
+      ],
+      labels: ['Desktop', 'Tablet', 'Mobile', 'Unknown']
+    }
+  }
   const options = {
     animation: false,
-    cutoutPercentage: 80,
+    cutoutPercentage: 82,
     layout: { padding: 0 },
     legend: {
       display: false
@@ -65,21 +72,27 @@ const TrafficByDevice = ({ className, ...rest }) => {
   const devices = [
     {
       title: 'Desktop',
-      value: 63,
+      value: ((device.desktop / sum) * 100).toFixed(1),
       icon: LaptopMacIcon,
       color: colors.indigo[500]
     },
     {
       title: 'Tablet',
-      value: 15,
+      value: ((device.tablet / sum) * 100).toFixed(1),
       icon: TabletIcon,
       color: colors.red[600]
     },
     {
       title: 'Mobile',
-      value: 23,
+      value: ((device.mobile / sum) * 100).toFixed(1),
       icon: PhoneIcon,
       color: colors.orange[600]
+    },
+    {
+      title: 'Unknown',
+      value: ((device.unknown / sum) * 100).toFixed(1),
+      icon: QuestionIcon,
+      color: colors.grey[600]
     }
   ]
 
@@ -93,12 +106,12 @@ const TrafficByDevice = ({ className, ...rest }) => {
         </Box>
         <Box display="flex" justifyContent="center" mt={2}>
           {devices.map(({ color, icon: Icon, title, value }) => (
-            <Box key={title} p={1} textAlign="center">
+            <Box key={title} p={0.5} textAlign="center">
               <Icon color="action" />
               <Typography color="textPrimary" variant="body1">
                 {title}
               </Typography>
-              <Typography style={{ color }} variant="h2">
+              <Typography style={{ color, fontSize: '1.7rem' }} variant="h5">
                 {value}%
               </Typography>
             </Box>
@@ -110,7 +123,8 @@ const TrafficByDevice = ({ className, ...rest }) => {
 }
 
 TrafficByDevice.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  statistics: PropTypes.object
 }
 
 export default TrafficByDevice

@@ -36,7 +36,7 @@ const Detail = props => {
         columns={columns}
         dataSource={answers}
         pagination={{
-          pageSize: 10,
+          defaultPageSize: 10,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: total => `Total ${total} Answers`

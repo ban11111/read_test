@@ -4,6 +4,14 @@ const p = { style: { margin: 8 } }
 
 export const columns = [
   {
+    title: 'No.',
+    dataIndex: 'word_index',
+    key: 'word_index',
+    render: index => {
+      return index + 1
+    }
+  },
+  {
     title: 'Word',
     dataIndex: 'word',
     key: 'word',

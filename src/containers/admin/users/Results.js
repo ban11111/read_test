@@ -312,7 +312,7 @@ const Results = ({ className, users, papers, reload, history, ...rest }) => {
               return value.name.toLowerCase().search(filterUserName.toLowerCase()) !== -1
             })}
             pagination={{
-              pageSize: 10,
+              defaultPageSize: 10,
               showSizeChanger: true,
               showQuickJumper: true,
               showTotal: total => `Total ${total} Users`

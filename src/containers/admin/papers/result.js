@@ -108,7 +108,7 @@ const Results = ({ className, papers, refreshPaper, ...rest }) => {
           dataSource={papers}
           rowSelection={{ ...rowSelection, type: 'checkbox' }}
           pagination={{
-            pageSize: 10,
+            defaultPageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: total => `Total ${total} Papers`
