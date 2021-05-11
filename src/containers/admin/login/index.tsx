@@ -66,7 +66,7 @@ const Login = (props: any) => {
         }
       },
       () => {
-        props.history.push('/admin/users')
+        props.history.push('/admin/dashboard')
       }
     )
   }
