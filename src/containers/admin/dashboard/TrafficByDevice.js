@@ -38,7 +38,7 @@ const TrafficByDevice = ({ className, statistics, ...rest }) => {
       datasets: [
         {
           data: [device.desktop, device.tablet, device.mobile, device.unknown],
-          backgroundColor: [colors.indigo[500], colors.red[600], colors.orange[600], colors.grey[600]],
+          backgroundColor: [colors.indigo[500], colors.red[600], colors.orange[600], colors.grey[400]],
           borderWidth: 4,
           borderColor: colors.common.white,
           hoverBorderColor: colors.common.white
