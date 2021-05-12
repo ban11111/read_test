@@ -4,6 +4,14 @@ import Typography from '@material-ui/core/Typography'
 import Recorder from 'recorder-core'
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
+import { TranslationOutlined } from '@ant-design/icons'
+import { dataSets } from './data'
+import { makeStyles, MenuItem, Select } from '@material-ui/core'
+
+const useStyles = makeStyles(() => ({
+  button: { marginTop: 30 },
+  button_focused: { marginTop: 30, color: 'green', fontSize: 18, fontWeight: 'bold' }
+}))
 
 const defaultAudioConf = {
   bitRate: 128, // kbps
@@ -11,7 +19,10 @@ const defaultAudioConf = {
 }
 
 const InstructionPage = props => {
+  const classes = useStyles()
+  const [buttonFocused, setButtonFocused] = useState(false)
   const [recordable, setRecordable] = useState(false)
+  const [langIndex, setLangIndex] = useState(0)
 
   const rec = Recorder({
     type: 'mp3',
@@ -20,8 +31,16 @@ const InstructionPage = props => {
     disableEnvInFix: false
   })
 
+  const focus = () => {
+    setButtonFocused(true)
+  }
+
+  const unFocus = () => {
+    setButtonFocused(false)
+  }
+
   useEffect(() => {
-    console.log('正在打开录音，请求麦克风权限...', props)
+    console.log('正在打开录音，请求麦克风权限...')
     rec.open(
       () => {
         console.log('已打开录音，可以点击开始了')
@@ -38,47 +57,60 @@ const InstructionPage = props => {
 
   const listStyle = { style: { listStyle: 'disc' } }
 
+  const langSelect = e => {
+    setLangIndex(e.target.value)
+  }
+
+  const renderLangList = () => {
+    return (
+      <>
+        <Select onChange={langSelect} value={langIndex} style={{ float: 'right', position: 'relative', bottom: 6 }}>
+          {dataSets.map((content, index) => (
+            <MenuItem key={'sel' + index} value={index}>
+              {content.lang}
+            </MenuItem>
+          ))}
+        </Select>
+        <TranslationOutlined style={{ float: 'right', marginRight: 5 }} />
+      </>
+    )
+  }
+
   return (
     <Container maxWidth="xs">
       <Typography component="h1" variant="h5" style={{ marginTop: 30 }}>
         Test Instructions
+        {renderLangList()}
       </Typography>
       <Divider />
       <ul style={{ marginTop: 40 }}>
-        <li {...listStyle}>Please test in a quiet environment.</li>
-        <li {...listStyle}>Please enable recording permission if you see a relative pop-up.</li>
-        <li {...listStyle}>
-          Please click the record button and read the presented word. After reading the word, click the record button
-          again to end.
-        </li>
-        <li {...listStyle}>Please input the meaning of the word in your native language.</li>
-        <li {...listStyle}>The time limit for each word is 15 seconds.</li>
-        <li {...listStyle}>Please click the “NEXT” button after completing each word.</li>
-        <li {...listStyle}>Please click the “NEXT” button if you do not know the word.</li>
-        <li {...listStyle}>Please do not consult the dictionary & textbooks or search the word online.</li>
-        <li {...listStyle}>Please do not quit before completion.</li>
+        {dataSets[langIndex].instructions.map((content, index) => (
+          <li {...listStyle} key={'ins' + index}>
+            {content}
+          </li>
+        ))}
       </ul>
-      <Typography component="span" variant="body1">
-        Information provided will be treated strictly confidential and will not be disclosed to third parties.
-      </Typography>
-      <br />
-      <Typography component="span" variant="body1">
-        We will not send you any irrelevant information.
-      </Typography>
-      <br />
-      <Typography component="span" variant="body1">
-        Thank you for your participation!
-      </Typography>
+      {dataSets[langIndex].endings.map((content, index) => (
+        <li key={'end' + index}>
+          <Typography component="span" variant="body1">
+            {content}
+          </Typography>
+        </li>
+      ))}
       <Button
-        style={{ marginTop: 30 }}
+        className={buttonFocused ? classes.button_focused : classes.button}
         fullWidth
         disabled={!recordable}
         variant="outlined"
         onClick={() => {
           props.history.push('/examination')
         }}
+        onMouseEnter={focus}
+        onMouseLeave={unFocus}
+        onFocus={focus}
+        onBlur={unFocus}
       >
-        Agree And Proceed
+        {dataSets[langIndex].button}
       </Button>
     </Container>
   )
