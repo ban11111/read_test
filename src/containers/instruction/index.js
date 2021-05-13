@@ -9,6 +9,8 @@ import { dataSets } from './data'
 import { makeStyles, MenuItem, Select } from '@material-ui/core'
 
 const useStyles = makeStyles(() => ({
+  select: { float: 'right', position: 'relative', bottom: 6, width: 43 },
+  select_icon: { float: 'right', marginRight: 4 },
   button: { marginTop: 30 },
   button_focused: { marginTop: 30, color: 'green', fontSize: 18, fontWeight: 'bold' }
 }))
@@ -64,14 +66,19 @@ const InstructionPage = props => {
   const renderLangList = () => {
     return (
       <>
-        <Select onChange={langSelect} value={langIndex} style={{ float: 'right', position: 'relative', bottom: 6 }}>
+        <Select
+          onChange={langSelect}
+          value={langIndex}
+          className={classes.select}
+          renderValue={value => dataSets[value].abbr}
+        >
           {dataSets.map((content, index) => (
             <MenuItem key={'sel' + index} value={index}>
               {content.lang}
             </MenuItem>
           ))}
         </Select>
-        <TranslationOutlined style={{ float: 'right', marginRight: 5 }} />
+        <TranslationOutlined className={classes.select_icon} />
       </>
     )
   }
@@ -79,12 +86,12 @@ const InstructionPage = props => {
   return (
     <Container maxWidth="xs">
       <Typography component="h1" variant="h5" style={{ marginTop: 30 }}>
-        Test Instructions
+        {dataSets[langIndex].title}
         {renderLangList()}
       </Typography>
       <Divider />
       <ul style={{ marginTop: 40 }}>
-        {dataSets[langIndex].instructions.map((content, index) => (
+        {dataSets[langIndex].content.map((content, index) => (
           <li {...listStyle} key={'ins' + index}>
             {content}
           </li>
