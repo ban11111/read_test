@@ -59,9 +59,7 @@ const columns = [
   {
     title: 'RegisteredAt',
     dataIndex: 'created_at',
-    render: time => {
-      return moment(time).format('YYYY-MM-DD hh:mm:ss')
-    }
+    render: time => moment(time).format('YYYY-MM-DD hh:mm:ss')
   },
   { title: 'Operation', dataIndex: 'id', render: undefined, fixed: 'right' }
 ]

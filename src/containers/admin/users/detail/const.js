@@ -1,4 +1,5 @@
 import React from 'react'
+import moment from 'moment'
 
 const p = { style: { margin: 8 } }
 
@@ -10,6 +11,12 @@ export const columns = [
     render: index => {
       return index + 1
     }
+  },
+  {
+    title: 'Time',
+    dataIndex: 'created_at',
+    key: 'created_at',
+    render: time => moment(time).format('hh:mm:ss')
   },
   {
     title: 'Word',

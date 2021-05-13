@@ -34,12 +34,12 @@ export const dataSets = [
       'Nếu hoàn thành trước, hãy nhấp vào “Next”.',
       'Nếu gặp chữ/từ k biết đọc hoặc không biết nghĩa, hãy nhấp vào “Next”.',
       'Vui lòng không tra từ điển và bài khóa hoặc tìm trên mạng.',
-      'Vui lòng k thoát ra khỏi bài kiểm tra giữa chừng..'
+      'Vui lòng k thoát ra khỏi bài kiểm tra giữa chừng.'
     ],
     endings: [
       'Thông tin bạn cung cấp trong phiếu trả lời sẽ được bảo mật nghiêm, sẽ không tiết lộ cho bên thứ ba.',
       'Và chúng tôi cũng sẽ không gửi cho bạn bất kỳ thông tin không liên quan nào.',
-      'Cảm ơn bạn đã tham gia!'
+      'Cảm ơn bạn đã tham gia !'
     ],
     button: 'Đồng ý và Tiếp tục'
   },
