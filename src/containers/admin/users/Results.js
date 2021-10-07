@@ -28,6 +28,7 @@ import TextField from '@material-ui/core/TextField'
 import CheckIcon from '@material-ui/icons/Check'
 import { Search as SearchIcon } from 'react-feather'
 import downloadFile from 'utils/download'
+import url from 'url'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -106,7 +107,7 @@ const Results = ({ className, users, papers, reload, history, ...rest }) => {
   }
   columns[columns.length - 1].render = (uid, user) => (
     <ButtonGroup size="small">
-      <Button color="primary" onClick={handleReviewOpen(user)} disabled={user.papers.length <= 0}>
+      <Button color="primary" onClick={handleReviewOpen(user)} disabled={!user.papers || user.papers.length <= 0}>
         review
       </Button>
       <Button color="secondary" onClick={handleOpen(uid)}>
@@ -164,6 +165,14 @@ const Results = ({ className, users, papers, reload, history, ...rest }) => {
         downloadFile(res)
       }
     })
+  }
+
+  const setPage = page => {
+    history.push(history.location.pathname + '?page=' + page)
+  }
+
+  const getPage = () => {
+    return url.parse(history.location.pathname + history.location.search, true).query.page || 1
   }
 
   const renderExportPopup = () => {
@@ -310,6 +319,10 @@ const Results = ({ className, users, papers, reload, history, ...rest }) => {
               return value.name.toLowerCase().search(filterUserName.toLowerCase()) !== -1
             })}
             pagination={{
+              current: getPage(),
+              onChange: page => {
+                setPage(page)
+              },
               defaultPageSize: 10,
               showSizeChanger: true,
               showQuickJumper: true,
